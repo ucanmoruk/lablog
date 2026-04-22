@@ -1,0 +1,120 @@
+"use client";
+import { blogs } from '@/data/mockData';
+import Link from 'next/link';
+import { useState } from 'react';
+import { ArrowRight, Calendar, Clock, Search } from 'lucide-react';
+import styles from './blog.module.css';
+
+const ALL_CATS = ['Tümü', 'Kozmetik', 'İlaç ve Hammadde', 'Tekstil ve Deri', 'Takviye Edici Gıda', 'Belgelendirme', 'Çevre ve Su', 'Ambalaj ve Plastik', 'Mikrobiyoloji'];
+const HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1576086213369-97a306d36557?q=80&w=2000&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1579154235602-3c2c2999d19b?q=80&w=1200&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1582719471384-894fbb16e024?q=80&w=1200&auto=format&fit=crop',
+];
+
+export default function BlogList() {
+  const [activeCat, setActiveCat] = useState('Tümü');
+  const [search, setSearch] = useState('');
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  const featured = blogs[0];
+  const rest = blogs.slice(1);
+  const filtered = rest.filter(b => {
+    const matchCat = activeCat === 'Tümü' || b.category === activeCat;
+    const matchSearch = !search || b.title.toLowerCase().includes(search.toLowerCase()) || b.excerpt.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  return (
+    <main className={styles.main}>
+      {/* ─── HERO: Featured Post ─── */}
+      <section className={styles.hero}>
+        <div className={styles.heroInner}>
+          <div className={styles.heroContent}>
+            <span className={styles.featuredLabel}>Öne Çıkan Yazı</span>
+            <h1 className={styles.heroTitle}>{featured.title}</h1>
+            <p className={styles.heroExcerpt}>{featured.excerpt}</p>
+            <div className={styles.heroMeta}>
+              <span className={styles.heroCat}>{featured.category}</span>
+              <span className={styles.heroMetaItem}><Calendar size={15} /> {featured.date}</span>
+              <span className={styles.heroMetaItem}><Clock size={15} /> 5 dk okuma</span>
+            </div>
+            <Link href={`/blog/${featured.id}`} className={styles.heroBtn}>
+              Yazıyı Oku <ArrowRight size={18} />
+            </Link>
+          </div>
+          <div className={styles.heroImg}>
+            <img src={HERO_IMAGES[0]} alt={featured.title} />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── NEWSLETTER ─── */}
+      <section className={styles.newsletter}>
+        <div className={styles.newsletterInner}>
+          <div>
+            <h2 className={styles.newsletterTitle}>Haftalık bültenimize abone olun</h2>
+            <p className={styles.newsletterSub}>Sektörel regülasyon güncellemeleri ve analiz rehberleri her hafta gelen kutunuzda.</p>
+          </div>
+          {subscribed ? (
+            <div className={styles.subscribedMsg}>✓ Abone oldunuz! Teşekkürler.</div>
+          ) : (
+            <form className={styles.newsletterForm} onSubmit={e => { e.preventDefault(); setSubscribed(true); }}>
+              <input type="email" placeholder="E-posta adresiniz" value={email} onChange={e => setEmail(e.target.value)} required className={styles.newsletterInput} />
+              <button type="submit" className={styles.newsletterBtn}>Abone Ol</button>
+            </form>
+          )}
+        </div>
+      </section>
+
+      {/* ─── FILTER + GRID ─── */}
+      <section className={styles.gridSection}>
+        <div className={styles.container}>
+          <div className={styles.filterRow}>
+            <h2 className={styles.gridTitle}>Son Yazılar</h2>
+            <div className={styles.searchWrap}>
+              <Search size={16} />
+              <input placeholder="Yazılarda ara..." value={search} onChange={e => setSearch(e.target.value)} className={styles.searchInput} />
+            </div>
+          </div>
+
+          <div className={styles.cats}>
+            {ALL_CATS.map(c => (
+              <button key={c} onClick={() => setActiveCat(c)} className={`${styles.catBtn} ${activeCat === c ? styles.catBtnActive : ''}`}>
+                {c}
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.blogGrid}>
+            {filtered.map((blog, i) => (
+              <Link href={`/blog/${blog.id}`} key={blog.id} className={styles.blogCard}>
+                <div className={styles.cardImg}>
+                  <img src={HERO_IMAGES[i % HERO_IMAGES.length]} alt={blog.title} />
+                  <span className={styles.cardCat}>{blog.category}</span>
+                </div>
+                <div className={styles.cardBody}>
+                  <div className={styles.cardMeta}>
+                    <span><Calendar size={13} /> {blog.date}</span>
+                    <span><Clock size={13} /> 5 dk</span>
+                  </div>
+                  <h3 className={styles.cardTitle}>{blog.title}</h3>
+                  <p className={styles.cardExc}>{blog.excerpt}</p>
+                  <span className={styles.cardRead}>Devamını Oku <ArrowRight size={14} /></span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className={styles.empty}>
+              <p>Bu kategoride yazı bulunamadı.</p>
+              <button onClick={() => { setActiveCat('Tümü'); setSearch(''); }} className={styles.emptyBtn}>Tümünü Göster</button>
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}
