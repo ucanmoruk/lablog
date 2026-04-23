@@ -33,13 +33,30 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
-  const related = await prisma.blogPost.findMany({
+  let related = await prisma.blogPost.findMany({
     where: {
       category: blog.category,
       NOT: { id: blog.id }
     },
     take: 3
   });
+
+  // Eğer aynı kategoride 3 yazı yoksa, diğer kategorilerden tamamla
+  if (related.length < 3) {
+    const more = await prisma.blogPost.findMany({
+      where: {
+        NOT: {
+          OR: [
+            { id: blog.id },
+            ...related.map(r => ({ id: r.id }))
+          ]
+        }
+      },
+      take: 3 - related.length,
+      orderBy: { date: 'desc' }
+    });
+    related = [...related, ...more];
+  }
 
   const blogData = {
     ...blog,
