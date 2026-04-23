@@ -81,29 +81,8 @@ export default function RegisterPage() {
       <div className={styles.rightCol}>
          <div className={styles.rightColOrb} />
          <div className={styles.rightColContent}>
-           <div className={styles.benefitList}>
-             <div className={styles.benefitItem}>
-               <CheckCircle2 size={24} className={styles.benefitIcon} />
-               <div>
-                 <h3>Hızlı Teklif Yönetimi</h3>
-                 <p>Tüm analiz taleplerinizi tek panelden takip edin ve anında onaylayın.</p>
-               </div>
-             </div>
-             <div className={styles.benefitItem}>
-               <CheckCircle2 size={24} className={styles.benefitIcon} />
-               <div>
-                 <h3>Dijital Rapor Arşivi</h3>
-                 <p>Geçmişe dönük tüm analiz sonuçlarınıza istediğiniz zaman ulaşın.</p>
-               </div>
-             </div>
-             <div className={styles.benefitItem}>
-               <CheckCircle2 size={24} className={styles.benefitIcon} />
-               <div>
-                 <h3>Sektörel Destek</h3>
-                 <p>Mevzuat ve regülasyonlar hakkında teknik ekibimizden destek alın.</p>
-               </div>
-             </div>
-           </div>
+           <h2>Her Sektör İçin Güvenilir Sonuçlar.</h2>
+           <p>Kozmetik, ilaç, gıda, tekstil ve daha fazlası. Tüm departmanlarımızdaki uzman kadromuz ve akredite altyapımızla test süreçlerinizi hızlandırıyoruz.</p>
          </div>
       </div>
     </div>

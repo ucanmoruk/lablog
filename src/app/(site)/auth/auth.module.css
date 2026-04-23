@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 40px;
+  padding: 80px 40px;
 }
 
 .rightCol {
@@ -91,9 +91,9 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  padding: 48px;
+  padding: 64px;
   width: 100%;
-  max-width: 480px;
+  max-width: 600px;
   box-shadow: var(--shadow-lg);
 }
 
