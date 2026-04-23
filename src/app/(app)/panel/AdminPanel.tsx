@@ -30,6 +30,11 @@ export default function AdminPanel() {
   const [offerPrice, setOfferPrice] = useState('');
   const [adminResponse, setAdminResponse] = useState('');
   const [sendingResponse, setSendingResponse] = useState(false);
+  
+  // Formal Quote States
+  const [quoteItems, setQuoteItems] = useState<{title: string, unitPrice: number, quantity: number}[]>([]);
+  const [vatRate, setVatRate] = useState(20);
+  const [quoteNotes, setQuoteNotes] = useState('');
 
   // Edit states
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
@@ -172,20 +177,34 @@ export default function AdminPanel() {
   };
 
   const handleSendResponse = async (id: string) => {
-    if (!adminResponse.trim()) return alert("Lütfen bir yanıt yazın.");
     setSendingResponse(true);
     try {
       const res = await fetch('/api/admin/quotes/respond', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, response: adminResponse })
+        body: JSON.stringify({ 
+          id, 
+          response: adminResponse,
+          quoteData: {
+            items: quoteItems,
+            vatRate,
+            notes: quoteNotes
+          }
+        })
       });
 
       if (res.ok) {
-        alert("Yanıt başarıyla gönderildi.");
+        alert("Resmi teklif başarıyla iletildi.");
         setAdminResponse('');
+        setQuoteItems([]);
+        setQuoteNotes('');
         // Listeyi güncelle
-        setQuoteList(quoteList.map(item => item.id === id ? { ...item, status: 'replied', response: adminResponse } : item));
+        setQuoteList(quoteList.map(item => item.id === id ? { 
+          ...item, 
+          status: 'sent', 
+          response: adminResponse,
+          quoteData: { items: quoteItems, vatRate, notes: quoteNotes }
+        } : item));
         setSelectedQuote(null);
       } else {
         alert("Hata oluştu.");
@@ -196,6 +215,24 @@ export default function AdminPanel() {
       setSendingResponse(false);
     }
   };
+
+  const addQuoteItem = () => {
+    setQuoteItems([...quoteItems, { title: '', unitPrice: 0, quantity: 1 }]);
+  };
+
+  const removeRow = (index: number) => {
+    setQuoteItems(quoteItems.filter((_, i) => i !== index));
+  };
+
+  const updateRow = (index: number, field: string, value: any) => {
+    const newItems = [...quoteItems];
+    (newItems[index] as any)[field] = value;
+    setQuoteItems(newItems);
+  };
+
+  const subtotal = quoteItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
+  const vatAmount = subtotal * (vatRate / 100);
+  const grandTotal = subtotal + vatAmount;
 
   const liveServices = services.slice(0, 100);
   const liveBlogPosts = blogList;
@@ -311,13 +348,27 @@ export default function AdminPanel() {
                   <span>Müşteri</span><span>İletişim / Mesaj</span><span>Tarih</span><span>İşlem</span>
                 </div>
                 {quoteList.map(q => (
-                  <div key={q.id} className={styles.quoteTableRow} onClick={() => setSelectedQuote(selectedQuote === q.id ? null : q.id)}>
+                  <div key={q.id} className={styles.quoteTableRow} onClick={() => {
+                    setSelectedQuote(selectedQuote === q.id ? null : q.id);
+                    setAdminResponse(q.response || '');
+                    if (q.quoteData) {
+                        setQuoteItems(q.quoteData.items || []);
+                        setVatRate(q.quoteData.vatRate || 20);
+                        setQuoteNotes(q.quoteData.notes || '');
+                    } else {
+                        setQuoteItems([]);
+                        setQuoteNotes('');
+                    }
+                  }}>
                     <div>
                       <div className={styles.tableTitle}>{q.name}</div>
                       <div className={styles.tableSub}>{q.email}</div>
                     </div>
-                    <div>
+                    <div className={styles.statusCell}>
                       <div className={styles.tableTitle} style={{fontSize:"0.85rem", opacity:0.8}}>{q.message?.slice(0, 50)}...</div>
+                      <div className={styles.statusBadge} data-status={q.status || 'pending'}>
+                        {q.status === 'sent' ? 'Teklif İletildi' : q.status === 'accepted' ? 'Onaylandı' : 'Yeni Talep'}
+                      </div>
                     </div>
                     <div className={styles.tableDate}>{new Date(q.createdAt).toLocaleDateString('tr-TR')}</div>
                     <div className={styles.tableActions} onClick={e => e.stopPropagation()}>
@@ -332,11 +383,11 @@ export default function AdminPanel() {
                 ))}
                 {quoteList.length === 0 && <div className={styles.empty}>Henüz teklif talebi bulunmuyor.</div>}
               </div>
-              {quoteList.map(q => selectedQuote === q.id && (
+               {quoteList.map(q => selectedQuote === q.id && (
                   <div key={`detail-${q.id}`} className={styles.quoteDetail}>
                     <div className={styles.quoteDetailGrid}>
                       <div className={styles.quoteDetailLeft}>
-                        <h3 className={styles.quoteDetailTitle}>Talep İletisi</h3>
+                        <h3 className={styles.quoteDetailTitle}>Müşteri Talebi</h3>
                         <div className={styles.quoteDetailMeta}>
                           <span><User size={14} /> {q.name}</span>
                           <span><MessageSquare size={14} /> {q.email}</span>
@@ -348,26 +399,85 @@ export default function AdminPanel() {
                       </div>
                       
                       <div className={styles.quoteDetailRight}>
-                        <h3 className={styles.quoteDetailTitle}>{q.status === 'replied' ? 'Gönderilen Yanıt' : 'Yanıt Yaz'}</h3>
-                        <textarea 
-                           className={styles.adminResponseArea}
-                           placeholder="Müşteriye iletilecek teklif detayı veya teknik bilgi..."
-                           value={adminResponse}
-                           onChange={e => setAdminResponse(e.target.value)}
-                           disabled={q.status === 'replied'}
-                        />
-                        {q.status !== 'replied' && (
+                        <h3 className={styles.quoteDetailTitle}>Teklif Hazırla</h3>
+                        
+                        <div className={styles.builderTable}>
+                           <div className={styles.builderHeader}>
+                              <span>Hizmet / Analiz</span>
+                              <span>BF (₺)</span>
+                              <span>Adet</span>
+                              <span></span>
+                           </div>
+                           {quoteItems.map((item, idx) => (
+                             <div key={idx} className={styles.builderRow}>
+                               <input 
+                                 className={styles.builderInput} 
+                                 placeholder="Analiz adı..."
+                                 value={item.title}
+                                 onChange={e => updateRow(idx, 'title', e.target.value)}
+                                 disabled={q.status === 'sent'}
+                               />
+                               <input 
+                                 className={styles.builderInput} 
+                                 type="number"
+                                 placeholder="0"
+                                 value={item.unitPrice}
+                                 onChange={e => updateRow(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
+                                 disabled={q.status === 'sent'}
+                               />
+                               <input 
+                                 className={styles.builderInput}
+                                 type="number" 
+                                 value={item.quantity}
+                                 onChange={e => updateRow(idx, 'quantity', parseInt(e.target.value) || 1)}
+                                 disabled={q.status === 'sent'}
+                               />
+                               {q.status !== 'sent' && (
+                                 <button className={styles.rowDelete} onClick={() => removeRow(idx)}><X size={14}/></button>
+                               )}
+                             </div>
+                           ))}
+                           {q.status !== 'sent' && (
+                             <button className={styles.addRowBtn} onClick={addQuoteItem}><Plus size={14}/> Yeni Satır Ekle</button>
+                           )}
+                        </div>
+
+                        <div className={styles.calculationBox}>
+                           <div className={styles.calcRow}><span>Ara Toplam:</span> <span>{subtotal.toLocaleString('tr-TR')} ₺</span></div>
+                           <div className={styles.calcRow}>
+                             <span>KDV Oranı:</span> 
+                             <select value={vatRate} onChange={e => setVatRate(parseInt(e.target.value))} disabled={q.status === 'sent'} className={styles.tinySelect}>
+                               <option value={0}>%0</option>
+                               <option value={10}>%10</option>
+                               <option value={20}>%20</option>
+                             </select>
+                           </div>
+                           <div className={styles.calcTotal}><span>Genel Toplam:</span> <span>{grandTotal.toLocaleString('tr-TR')} ₺</span></div>
+                        </div>
+
+                        <div style={{marginTop:"20px"}}>
+                            <label className={styles.label}>Teklif Notları (Müşteriye iletilir)</label>
+                            <textarea 
+                               className={styles.adminResponseArea}
+                               style={{minHeight:"100px"}}
+                               placeholder="Örn: Analizler 3 iş günü içinde tamamlanacaktır..."
+                               value={quoteNotes}
+                               onChange={e => setQuoteNotes(e.target.value)}
+                               disabled={q.status === 'sent'}
+                            />
+                        </div>
+
+                        {q.status !== 'sent' ? (
                           <button 
                             className={styles.sendResponseBtn}
                             onClick={() => handleSendResponse(q.id)}
-                            disabled={sendingResponse}
+                            disabled={sendingResponse || quoteItems.length === 0}
                           >
-                            {sendingResponse ? 'Gönderiliyor...' : 'Yanıtı Gönder & Mail At'}
+                            {sendingResponse ? 'Gönderiliyor...' : 'Resmi Teklif Oluştur & Mail At'}
                           </button>
-                        )}
-                        {q.status === 'replied' && (
+                        ) : (
                           <div className={styles.replyNotice}>
-                            <CheckCircle2 size={16} /> Bu talep yanıtlandı.
+                            <CheckCircle2 size={16} /> Bu teklif müşteriye iletildi.
                           </div>
                         )}
                       </div>

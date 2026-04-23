@@ -410,3 +410,110 @@
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+
+/* ─── Formal Quote Builder Styles ─── */
+.builderTable {
+    margin: 20px 0;
+    background: #fff;
+    border: 1px solid #e8e8ed;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.builderHeader {
+    display: grid;
+    grid-template-columns: 1fr 100px 80px 40px;
+    gap: 10px;
+    background: #f5f5f7;
+    padding: 12px 15px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #aeaeb2;
+    text-transform: uppercase;
+}
+
+.builderRow {
+    display: grid;
+    grid-template-columns: 1fr 100px 80px 40px;
+    gap: 10px;
+    padding: 10px 15px;
+    border-bottom: 1px solid #f2f2f7;
+    align-items: center;
+}
+
+.builderInput {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d2d2d7;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+}
+
+.builderInput:focus { border-color: #0066cc; }
+
+.addRowBtn {
+    width: 100%;
+    padding: 12px;
+    background: #f5f5f7;
+    border: none;
+    color: #0066cc;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.addRowBtn:hover { background: #eef2ff; }
+
+.rowDelete {
+    background: none;
+    border: none;
+    color: #aeaeb2;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.rowDelete:hover { color: #dc2626; }
+
+.calculationBox {
+    background: #f5f5f7;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.calcRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #6e6e73;
+    margin-bottom: 10px;
+}
+
+.calcTotal {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1d1d1f;
+    padding-top: 10px;
+    border-top: 1px solid #d2d2d7;
+}
+
+.tinySelect {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #d2d2d7;
+    font-size: 12px;
+}
+
+.statusCell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}

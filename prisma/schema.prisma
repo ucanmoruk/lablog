@@ -46,7 +46,8 @@ model ContactMessage {
   phone     String?
   message   String
   response  String?
-  status    String   @default("pending") // pending, replied, closed
+  quoteData Json?    // { items: [], vatRate: 20, notes: "" }
+  status    String   @default("pending") // pending, sent, rejected, accepted
   createdAt DateTime @default(now())
   repliedAt DateTime?
 }
