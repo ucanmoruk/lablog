@@ -72,22 +72,39 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
       take: 5
     });
 
+    // Eğer aynı kategoride popüler yoksa, GENEL popülerleri getir
     if (popularServices.length === 0) {
+      popularServices = await prisma.analysis.findMany({
+        where: {
+          popular: true,
+          NOT: { id: service?.id || resolvedParams.slug }
+        },
+        take: 5
+      });
+    }
+
+    // DB'de hala bir şey yoksa MOCK veriye geç
+    if (popularServices.length === 0) {
+      // Önce aynı kategorideki mock popülerler
       popularServices = mockServices.filter(s => 
         s.category === service?.category && 
         s.popular && 
         s.id !== (service?.id || resolvedParams.slug)
       ).slice(0, 5);
-    }
-    
-    // Eğer hala boşsa genel popülerleri getir
-    if (popularServices.length === 0) {
-        popularServices = mockServices.filter(s => s.popular && s.id !== (service?.id || resolvedParams.slug)).slice(0, 5);
+
+      // Hala boşsa herhangi bir mock popüler
+      if (popularServices.length === 0) {
+        popularServices = mockServices.filter(s => 
+          s.popular && 
+          s.id !== (service?.id || resolvedParams.slug)
+        ).slice(0, 5);
+      }
     }
   } catch (error) {
     console.warn("Analysis DB error, falling back to mock:", error);
     service = mockServices.find(s => s.id === resolvedParams.slug || s.slug === resolvedParams.slug);
-    popularServices = mockServices.filter(s => s.category === service?.category && s.popular && s.id !== (service?.id || resolvedParams.slug)).slice(0, 5);
+    // Hata durumunda direkt genel popüler mock'lara düş
+    popularServices = mockServices.filter(s => s.popular && s.id !== (service?.id || resolvedParams.slug)).slice(0, 5);
   }
 
   // Blogları çek
