@@ -71,7 +71,7 @@ export default function ContactPage() {
                 <div className={styles.iconWrap}><Mail size={20} /></div>
                 <div>
                   <div className={styles.infoLabel}>E-posta</div>
-                  <a href="mailto:info@labcozum.com.tr" className={styles.infoVal}>info@labcozum.com.tr</a>
+                  <a href="mailto:info@laboratuvardan.com" className={styles.infoVal}>info@laboratuvardan.com</a>
                   <div className={styles.infoSub}>Genel sorular ve teklif talepleri için</div>
                 </div>
               </div>
@@ -80,7 +80,7 @@ export default function ContactPage() {
                 <div className={styles.iconWrap}><Phone size={20} /></div>
                 <div>
                   <div className={styles.infoLabel}>Telefon & WhatsApp</div>
-                  <a href="tel:+902120000000" className={styles.infoVal}>+90 212 000 00 00</a>
+                  <a href="https://wa.me/905401068640" target="_blank" rel="noopener noreferrer" className={styles.infoVal}>+90 540 106 86 40</a>
                   <div className={styles.infoSub}>Hafta içi 09:00 - 18:00 arası</div>
                 </div>
               </div>

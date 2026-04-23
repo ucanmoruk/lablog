@@ -30,10 +30,10 @@ export default function SectorPageContent({ sector, sectorServices, relatedSecto
             <h1 className={styles.heroH1}>{sector.heroTitle}</h1>
             <p className={styles.heroSub}>{sector.heroSubtitle}</p>
             <div className={styles.heroCtas}>
-              <a href="tel:+905000000000" className={styles.ctaPrimary} style={{ background: sector.accentColor }}>
+              <a href="https://wa.me/905401068640" target="_blank" rel="noopener noreferrer" className={styles.ctaPrimary} style={{ background: sector.accentColor }}>
                 <Phone size={18} /> Hemen Teklif Al
               </a>
-              <a href="mailto:info@labcozum.com" className={styles.ctaSecondary}>
+              <a href="mailto:info@laboratuvardan.com" className={styles.ctaSecondary}>
                 <Mail size={18} /> E-posta Gönder
               </a>
             </div>
@@ -177,7 +177,7 @@ export default function SectorPageContent({ sector, sectorServices, relatedSecto
               <p className={styles.ctaBandP}>Uzman ekibimiz 24 saat içinde size dönecektir.</p>
             </div>
             <div className={styles.ctaBandBtns}>
-              <a href="tel:+905000000000" className={styles.ctaBandBtnWhite}>
+              <a href="https://wa.me/905401068640" target="_blank" rel="noopener noreferrer" className={styles.ctaBandBtnWhite}>
                 <Phone size={18} /> Hemen Ara
               </a>
               <Link href="/blog" className={styles.ctaBandBtnOutline}>Blog & Rehberler</Link>

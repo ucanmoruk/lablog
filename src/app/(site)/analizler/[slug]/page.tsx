@@ -217,7 +217,9 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <div className={styles.cardIco}><Zap size={20} /></div>
               <h3>Hızlı Destek</h3>
               <p>Analiz süreçleri ve regülasyonlar hakkında teknik ekibimizden destek alın.</p>
-              <button className={styles.sidebarCta}>Müşteri Temsilcisine Bağlan</button>
+              <a href="https://wa.me/905401068640" target="_blank" rel="noopener noreferrer" className={styles.sidebarCta}>
+                Müşteri Temsilcisine Bağlan
+              </a>
             </div>
 
             <div className={styles.popularCard}>

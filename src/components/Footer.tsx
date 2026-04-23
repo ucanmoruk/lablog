@@ -22,8 +22,12 @@ export default function Footer() {
             </Link>
             <p className={styles.desc}>1500+ akredite parametre ile kozmetik, ilaç, gıda, tekstil ve daha pek çok alanda test, analiz ve belgelendirme hizmetleri.</p>
             <div className={styles.contact}>
-              <div className={styles.contactItem}><Phone size={14}/> +90 212 000 00 00</div>
-              <div className={styles.contactItem}><Mail size={14}/> info@labcozum.com.tr</div>
+              <a href="https://wa.me/905401068640" target="_blank" rel="noopener noreferrer" className={styles.contactItem} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Phone size={14}/> +90 540 106 86 40
+              </a>
+              <a href="mailto:info@laboratuvardan.com" className={styles.contactItem} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Mail size={14}/> info@laboratuvardan.com
+              </a>
               <div className={styles.contactItem}><MapPin size={14}/> İstanbul, Türkiye</div>
             </div>
           </div>
