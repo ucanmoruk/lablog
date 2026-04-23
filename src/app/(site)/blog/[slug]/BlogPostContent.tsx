@@ -25,7 +25,7 @@ export default function BlogPostContent({ blog, related }: { blog: any; related:
 
         <div className={styles.heroImageContainer}>
           <img 
-            src="https://images.unsplash.com/photo-1582719471384-894fbb16e024?q=80&w=2000&auto=format&fit=crop" 
+            src={blog.coverImage || "https://images.unsplash.com/photo-1582719471384-894fbb16e024?q=80&w=2000&auto=format&fit=crop"} 
             alt={blog.title}
             className={styles.heroImage}
           />
@@ -94,7 +94,7 @@ export default function BlogPostContent({ blog, related }: { blog: any; related:
             {related.map(r => (
               <Link href={`/blog/${r.slug}`} key={r.id} className={styles.relatedCard}>
                 <div className={styles.relatedThumb}>
-                   <img src="https://images.unsplash.com/photo-1579154235602-3c2c2999d19b?q=80&w=800&auto=format&fit=crop" alt={r.title} />
+                   <img src={r.coverImage || "https://images.unsplash.com/photo-1579154235602-3c2c2999d19b?q=80&w=800&auto=format&fit=crop"} alt={r.title} />
                 </div>
                 <div className={styles.relatedContent}>
                   <span className={styles.relatedCategory}>{r.category}</span>

@@ -21,6 +21,7 @@ interface BlogPost {
   excerpt: string;
   content: string;
   featured: boolean;
+  coverImage?: string;
 }
 
 export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
@@ -60,7 +61,7 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
             </Link>
           </div>
           <div className={styles.heroImg}>
-            <img src={HERO_IMAGES[0]} alt={featured.title} />
+            <img src={featured.coverImage || HERO_IMAGES[0]} alt={featured.title} />
           </div>
         </div>
       </section>
@@ -106,7 +107,7 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
             {filtered.map((blog, i) => (
               <Link href={`/blog/${blog.slug}`} key={blog.id} className={styles.blogCard}>
                 <div className={styles.cardImg}>
-                  <img src={HERO_IMAGES[i % HERO_IMAGES.length]} alt={blog.title} />
+                  <img src={blog.coverImage || HERO_IMAGES[i % HERO_IMAGES.length]} alt={blog.title} />
                   <span className={styles.cardCat}>{blog.category}</span>
                 </div>
                 <div className={styles.cardBody}>
