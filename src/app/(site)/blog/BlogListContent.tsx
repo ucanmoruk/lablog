@@ -13,6 +13,7 @@ const HERO_IMAGES = [
 
 interface BlogPost {
   id: string;
+  slug: string;
   title: string;
   date: string;
   author: string;
@@ -51,7 +52,7 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
               <span className={styles.heroMetaItem}><Calendar size={15} /> {featured.date}</span>
               <span className={styles.heroMetaItem}><Clock size={15} /> 5 dk okuma</span>
             </div>
-            <Link href={`/blog/${featured.id}`} className={styles.heroBtn}>
+            <Link href={`/blog/${featured.slug}`} className={styles.heroBtn}>
               Yazıyı Oku <ArrowRight size={18} />
             </Link>
           </div>
@@ -100,7 +101,7 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
 
           <div className={styles.blogGrid}>
             {filtered.map((blog, i) => (
-              <Link href={`/blog/${blog.id}`} key={blog.id} className={styles.blogCard}>
+              <Link href={`/blog/${blog.slug}`} key={blog.id} className={styles.blogCard}>
                 <div className={styles.cardImg}>
                   <img src={HERO_IMAGES[i % HERO_IMAGES.length]} alt={blog.title} />
                   <span className={styles.cardCat}>{blog.category}</span>

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+export const dynamic = 'force-dynamic';
 import styles from './service.module.css';
 import ClientAddButton from './ClientAddButton';
 import { Shield, Clock, Beaker, ArrowRight, ChevronLeft, User, Calendar, Award, Share2, Zap } from 'lucide-react';

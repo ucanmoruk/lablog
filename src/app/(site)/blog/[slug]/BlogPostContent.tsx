@@ -92,7 +92,7 @@ export default function BlogPostContent({ blog, related }: { blog: any; related:
           <h2 className={styles.relatedTitle}>İlginizi Çekebilir</h2>
           <div className={styles.relatedGrid}>
             {related.map(r => (
-              <Link href={`/blog/${r.id}`} key={r.id} className={styles.relatedCard}>
+              <Link href={`/blog/${r.slug}`} key={r.id} className={styles.relatedCard}>
                 <div className={styles.relatedThumb}>
                    <img src="https://images.unsplash.com/photo-1579154235602-3c2c2999d19b?q=80&w=800&auto=format&fit=crop" alt={r.title} />
                 </div>

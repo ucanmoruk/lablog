@@ -4,6 +4,7 @@ import { useQuote } from '@/context/QuoteContext';
 import styles from './search.module.css';
 import { Suspense, useEffect, useState } from 'react';
 import { PlusCircle, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import { Service } from '@/data/mockData';
 
 function SearchResults() {
@@ -68,7 +69,7 @@ function SearchResults() {
                   <div className={styles.cardInfo}>
                     <span className={styles.category}>{service.category}</span>
                     <h3 className={styles.cardTitle}>
-                      <a href={`/analizler/${service.id}`} style={{textDecoration: 'none', color: 'inherit'}}>{service.title}</a>
+                      <Link href={`/analizler/${service.id}`} style={{textDecoration: 'none', color: 'inherit'}}>{service.title}</Link>
                     </h3>
                     <p className={styles.cardDesc}>{service.description}</p>
                     {service.standards && (
