@@ -14,14 +14,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   let service: any = null;
   
   try {
-    service = await prisma.analysis.findFirst({
-      where: { 
-        OR: [
-          { id: resolvedParams.slug },
-          { slug: resolvedParams.slug }
-        ]
-      }
+    // Önce ID ile dene (en güvenli yol)
+    service = await prisma.analysis.findUnique({
+      where: { id: resolvedParams.slug }
     });
+    
+    // ID ile bulunamadıysa SLUG ile dene (yeni şema gerektirir)
+    if (!service) {
+      service = await prisma.analysis.findFirst({
+        where: { slug: resolvedParams.slug }
+      });
+    }
     
     if (!service) {
       service = mockServices.find(s => s.id === resolvedParams.slug || s.slug === resolvedParams.slug);
@@ -44,14 +47,17 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   let popularServices: any[] = [];
 
   try {
-    service = await prisma.analysis.findFirst({
-      where: { 
-        OR: [
-          { id: resolvedParams.slug },
-          { slug: resolvedParams.slug }
-        ]
-      }
+    // Önce ID ile dene
+    service = await prisma.analysis.findUnique({
+      where: { id: resolvedParams.slug }
     });
+
+    // Bulunamazsa slug ile dene
+    if (!service) {
+      service = await prisma.analysis.findFirst({
+        where: { slug: resolvedParams.slug }
+      });
+    }
 
     if (!service) {
       service = mockServices.find(s => s.id === resolvedParams.slug || s.slug === resolvedParams.slug);
