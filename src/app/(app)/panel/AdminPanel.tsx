@@ -34,7 +34,10 @@ export default function AdminPanel() {
   // Formal Quote States
   const [quoteItems, setQuoteItems] = useState<{title: string, unitPrice: number, quantity: number}[]>([]);
   const [vatRate, setVatRate] = useState(20);
+  const [discountRate, setDiscountRate] = useState(0);
+  const [additionalEmails, setAdditionalEmails] = useState('');
   const [quoteNotes, setQuoteNotes] = useState('');
+  const [isRevision, setIsRevision] = useState(false);
 
   // Edit states
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
@@ -188,22 +191,27 @@ export default function AdminPanel() {
           quoteData: {
             items: quoteItems,
             vatRate,
-            notes: quoteNotes
+            discountRate,
+            notes: quoteNotes,
+            additionalEmails
           }
         })
       });
 
       if (res.ok) {
-        alert("Resmi teklif başarıyla iletildi.");
+        alert(isRevision ? "Teklif revize edildi ve tekrar gönderildi." : "Resmi teklif başarıyla iletildi.");
         setAdminResponse('');
         setQuoteItems([]);
         setQuoteNotes('');
+        setDiscountRate(0);
+        setAdditionalEmails('');
+        setIsRevision(false);
         // Listeyi güncelle
         setQuoteList(quoteList.map(item => item.id === id ? { 
           ...item, 
           status: 'sent', 
           response: adminResponse,
-          quoteData: { items: quoteItems, vatRate, notes: quoteNotes }
+          quoteData: { items: quoteItems, vatRate, discountRate, notes: quoteNotes, additionalEmails }
         } : item));
         setSelectedQuote(null);
       } else {
@@ -214,6 +222,10 @@ export default function AdminPanel() {
     } finally {
       setSendingResponse(false);
     }
+  };
+
+  const startRevision = () => {
+    setIsRevision(true);
   };
 
   const addQuoteItem = () => {
@@ -231,8 +243,9 @@ export default function AdminPanel() {
   };
 
   const subtotal = quoteItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
-  const vatAmount = subtotal * (vatRate / 100);
-  const grandTotal = subtotal + vatAmount;
+  const discountAmount = subtotal * (discountRate / 100);
+  const vatAmount = (subtotal - discountAmount) * (vatRate / 100);
+  const grandTotal = (subtotal - discountAmount) + vatAmount;
 
   const liveServices = services.slice(0, 100);
   const liveBlogPosts = blogList;
@@ -345,7 +358,7 @@ export default function AdminPanel() {
 
               <div className={styles.listTable}>
                 <div className={styles.quoteTableHead}>
-                  <span>Müşteri</span><span>İletişim / Mesaj</span><span>Tarih</span><span>İşlem</span>
+                  <span>Müşteri</span><span>İletişim / Mesaj</span><span>Durum</span><span>Tarih</span><span>İşlem</span>
                 </div>
                 {quoteList.map(q => (
                   <div key={q.id} className={styles.quoteTableRow} onClick={() => {
@@ -354,20 +367,28 @@ export default function AdminPanel() {
                     if (q.quoteData) {
                         setQuoteItems(q.quoteData.items || []);
                         setVatRate(q.quoteData.vatRate || 20);
+                        setDiscountRate(q.quoteData.discountRate || 0);
+                        setAdditionalEmails(q.quoteData.additionalEmails || '');
                         setQuoteNotes(q.quoteData.notes || '');
+                        setIsRevision(false);
                     } else {
                         setQuoteItems([]);
                         setQuoteNotes('');
+                        setDiscountRate(0);
+                        setAdditionalEmails('');
+                        setIsRevision(false);
                     }
                   }}>
                     <div>
                       <div className={styles.tableTitle}>{q.name}</div>
                       <div className={styles.tableSub}>{q.email}</div>
                     </div>
-                    <div className={styles.statusCell}>
-                      <div className={styles.tableTitle} style={{fontSize:"0.85rem", opacity:0.8}}>{q.message?.slice(0, 50)}...</div>
+                    <div>
+                      <div className={styles.tableTitle} style={{fontSize:"0.85rem", opacity:0.8}}>{q.message?.slice(0, 40)}...</div>
+                    </div>
+                    <div>
                       <div className={styles.statusBadge} data-status={q.status || 'pending'}>
-                        {q.status === 'sent' ? 'Teklif İletildi' : q.status === 'accepted' ? 'Onaylandı' : 'Yeni Talep'}
+                        {q.status === 'sent' ? 'İletildi' : q.status === 'accepted' ? 'Onaylandı' : 'Yeni Talep'}
                       </div>
                     </div>
                     <div className={styles.tableDate}>{new Date(q.createdAt).toLocaleDateString('tr-TR')}</div>
@@ -415,7 +436,7 @@ export default function AdminPanel() {
                                  placeholder="Analiz adı..."
                                  value={item.title}
                                  onChange={e => updateRow(idx, 'title', e.target.value)}
-                                 disabled={q.status === 'sent'}
+                                 disabled={q.status === 'sent' && !isRevision}
                                />
                                <input 
                                  className={styles.builderInput} 
@@ -423,21 +444,21 @@ export default function AdminPanel() {
                                  placeholder="0"
                                  value={item.unitPrice}
                                  onChange={e => updateRow(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
-                                 disabled={q.status === 'sent'}
+                                 disabled={q.status === 'sent' && !isRevision}
                                />
                                <input 
                                  className={styles.builderInput}
                                  type="number" 
                                  value={item.quantity}
                                  onChange={e => updateRow(idx, 'quantity', parseInt(e.target.value) || 1)}
-                                 disabled={q.status === 'sent'}
+                                 disabled={q.status === 'sent' && !isRevision}
                                />
-                               {q.status !== 'sent' && (
+                               {(q.status !== 'sent' || isRevision) && (
                                  <button className={styles.rowDelete} onClick={() => removeRow(idx)}><X size={14}/></button>
                                )}
                              </div>
                            ))}
-                           {q.status !== 'sent' && (
+                           {(q.status !== 'sent' || isRevision) && (
                              <button className={styles.addRowBtn} onClick={addQuoteItem}><Plus size={14}/> Yeni Satır Ekle</button>
                            )}
                         </div>
@@ -445,14 +466,40 @@ export default function AdminPanel() {
                         <div className={styles.calculationBox}>
                            <div className={styles.calcRow}><span>Ara Toplam:</span> <span>{subtotal.toLocaleString('tr-TR')} ₺</span></div>
                            <div className={styles.calcRow}>
+                             <span>İskonto Uygula:</span> 
+                             <div style={{display:"flex", alignItems:"center", gap:"5px"}}>
+                                % <input 
+                                    className={styles.tinyInput} 
+                                    type="number" 
+                                    value={discountRate} 
+                                    onChange={e => setDiscountRate(parseFloat(e.target.value) || 0)}
+                                    disabled={q.status === 'sent' && !isRevision}
+                                  />
+                             </div>
+                           </div>
+                           {discountAmount > 0 && (
+                             <div className={styles.calcRow} style={{color:"#dc2626"}}><span>İndirim Tutarı:</span> <span>-{discountAmount.toLocaleString('tr-TR')} ₺</span></div>
+                           )}
+                           <div className={styles.calcRow}>
                              <span>KDV Oranı:</span> 
-                             <select value={vatRate} onChange={e => setVatRate(parseInt(e.target.value))} disabled={q.status === 'sent'} className={styles.tinySelect}>
+                             <select value={vatRate} onChange={e => setVatRate(parseInt(e.target.value))} disabled={q.status === 'sent' && !isRevision} className={styles.tinySelect}>
                                <option value={0}>%0</option>
                                <option value={10}>%10</option>
                                <option value={20}>%20</option>
                              </select>
                            </div>
                            <div className={styles.calcTotal}><span>Genel Toplam:</span> <span>{grandTotal.toLocaleString('tr-TR')} ₺</span></div>
+                        </div>
+
+                        <div style={{marginTop:"20px"}}>
+                            <label className={styles.label}>Ek Alıcı E-postaları (Virgülle ayırın)</label>
+                            <input 
+                               className={styles.builderInput}
+                               placeholder="muhasebe@firma.com, yonetim@firma.com"
+                               value={additionalEmails}
+                               onChange={e => setAdditionalEmails(e.target.value)}
+                               disabled={q.status === 'sent' && !isRevision}
+                            />
                         </div>
 
                         <div style={{marginTop:"20px"}}>
@@ -463,21 +510,26 @@ export default function AdminPanel() {
                                placeholder="Örn: Analizler 3 iş günü içinde tamamlanacaktır..."
                                value={quoteNotes}
                                onChange={e => setQuoteNotes(e.target.value)}
-                               disabled={q.status === 'sent'}
+                               disabled={q.status === 'sent' && !isRevision}
                             />
                         </div>
 
-                        {q.status !== 'sent' ? (
+                        {(q.status !== 'sent' || isRevision) ? (
                           <button 
                             className={styles.sendResponseBtn}
                             onClick={() => handleSendResponse(q.id)}
                             disabled={sendingResponse || quoteItems.length === 0}
                           >
-                            {sendingResponse ? 'Gönderiliyor...' : 'Resmi Teklif Oluştur & Mail At'}
+                            {sendingResponse ? 'Gönderiliyor...' : (isRevision ? 'Teklifi Güncelle & Yeniden Gönder' : 'Resmi Teklif Oluştur & Mail At')}
                           </button>
                         ) : (
-                          <div className={styles.replyNotice}>
-                            <CheckCircle2 size={16} /> Bu teklif müşteriye iletildi.
+                          <div style={{display:"flex", gap:"10px", marginTop:"20px"}}>
+                            <div className={styles.replyNotice} style={{flex:1, marginTop:0}}>
+                              <CheckCircle2 size={16} /> Teklif iletildi.
+                            </div>
+                            <button className={styles.previewBtn} onClick={startRevision}>
+                                <PenSquare size={14}/> Revize Et
+                            </button>
                           </div>
                         )}
                       </div>

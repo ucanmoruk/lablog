@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+export async function sendEmail({ to, subject, html, cc }: { to: string; subject: string; html: string; cc?: string }) {
   // Transporter configuration using environment variables
   // If these are not provided, it will log to console as a fallback
   const transporter = nodemailer.createTransport({
@@ -16,13 +16,14 @@ export async function sendEmail({ to, subject, html }: { to: string; subject: st
   try {
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
       console.warn("Mail configuration missing (SMTP_USER/SMTP_PASS). Email content:");
-      console.log(`To: ${to}\nSubject: ${subject}\nContent: ${html}`);
+      console.log(`To: ${to}\nCC: ${cc}\nSubject: ${subject}\nContent: ${html}`);
       return { success: true, mocked: true };
     }
 
     const info = await transporter.sendMail({
       from: `"LabLog Bildirim" <${process.env.SMTP_USER}>`,
       to,
+      cc,
       subject,
       html,
     });

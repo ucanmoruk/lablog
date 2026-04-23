@@ -26,8 +26,9 @@ export async function POST(request: Request) {
     let quoteHtml = '';
     if (quoteData && quoteData.items && quoteData.items.length > 0) {
         const subtotal = quoteData.items.reduce((acc: number, item: any) => acc + (item.unitPrice * item.quantity), 0);
-        const vat = subtotal * (quoteData.vatRate / 100);
-        const total = subtotal + vat;
+        const discount = subtotal * ( (quoteData.discountRate || 0) / 100 );
+        const vat = (subtotal - discount) * ( (quoteData.vatRate || 20) / 100);
+        const total = (subtotal - discount) + vat;
 
         quoteHtml = `
             <div style="margin: 25px 0; border: 1px solid #e8e8ed; border-radius: 8px; overflow: hidden;">
@@ -55,6 +56,12 @@ export async function POST(request: Request) {
                             <td colspan="3" style="padding: 12px; text-align: right; color: #6e6e73;">Ara Toplam:</td>
                             <td style="padding: 12px; text-align: right; font-weight: 600;">${subtotal.toLocaleString('tr-TR')} ₺</td>
                         </tr>
+                        ${discount > 0 ? `
+                        <tr>
+                            <td colspan="3" style="padding: 12px; text-align: right; color: #dc2626;">İskonto (%${quoteData.discountRate}):</td>
+                            <td style="padding: 12px; text-align: right; font-weight: 600; color: #dc2626;">-${discount.toLocaleString('tr-TR')} ₺</td>
+                        </tr>
+                        ` : ''}
                         <tr>
                             <td colspan="3" style="padding: 12px; text-align: right; color: #6e6e73;">KDV (%${quoteData.vatRate}):</td>
                             <td style="padding: 12px; text-align: right; font-weight: 600;">${vat.toLocaleString('tr-TR')} ₺</td>
@@ -75,11 +82,12 @@ export async function POST(request: Request) {
         `;
     }
 
-    // 3. Send email to the customer
+    // 3. Send email to the customer + CC if provided
     try {
       await sendEmail({
         to: updatedMessage.email,
-        subject: `Resmi Fiyat Teklifi: ${updatedMessage.name}`,
+        cc: quoteData.additionalEmails || undefined,
+        subject: `[REVİZE] Resmi Fiyat Teklifi: ${updatedMessage.name}`,
         html: `
           <div style="font-family: sans-serif; padding: 30px; color: #333; max-width: 700px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px;">
             <div style="text-align: center; margin-bottom: 30px;">
@@ -89,7 +97,7 @@ export async function POST(request: Request) {
             </div>
             
             <h2 style="color: #1d1d1f; font-size: 18px;">Sayın ${updatedMessage.name},</h2>
-            <p style="line-height: 1.6; font-size: 15px;">İletmiş olduğunuz analiz talebine istinaden hazırlanan resmi fiyat teklifi aşağıda bilgilerinize sunulmuştur:</p>
+            <p style="line-height: 1.6; font-size: 15px;">Talebinize istinaden hazırlanan ${quoteData.revisionNum ? 'revize ' : ''}resmi fiyat teklifi aşağıda bilgilerinize sunulmuştur:</p>
             
             ${quoteHtml}
 
