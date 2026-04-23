@@ -20,6 +20,7 @@ interface BlogPost {
   category: string;
   excerpt: string;
   content: string;
+  featured: boolean;
 }
 
 export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
@@ -30,8 +31,10 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
 
   if (!blogs || blogs.length === 0) return <div>Yazı bulunamadı.</div>;
 
-  const featured = blogs[0];
-  const rest = blogs.slice(1);
+  // Find the manually selected featured post, or fallback to the latest one
+  const featured = blogs.find(b => b.featured) || blogs[0];
+  const rest = blogs.filter(b => b.id !== featured.id);
+  
   const filtered = rest.filter(b => {
     const matchCat = activeCat === 'Tümü' || b.category === activeCat;
     const matchSearch = !search || b.title.toLowerCase().includes(search.toLowerCase()) || b.excerpt.toLowerCase().includes(search.toLowerCase());

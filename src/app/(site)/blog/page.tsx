@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import BlogListContent from './BlogListContent';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Laboratuvar Günlüğü | Sektörel Rehberler ve Analiz Bilgileri',
   description: 'Kozmetik, ilaç, gıda ve çevre sektörlerine yönelik regülasyon güncellemeleri, analiz rehberleri ve sektörel içerikler.',

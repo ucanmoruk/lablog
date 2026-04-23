@@ -7,7 +7,8 @@ import {
   LogOut, Globe, X, CheckCircle2, XCircle, MessageSquare, Clock, User, Calendar
 } from 'lucide-react';
 import { services } from '@/data/mockData';
-import { blogs } from '@/data/mockData';
+import { blogs as mockBlogs } from '@/data/mockData';
+import { useEffect } from 'react';
 import styles from './panel.module.css';
 
 type Tab = 'dashboard' | 'blog-new' | 'blog-list' | 'analysis-new' | 'analysis-list' | 'quotes' | 'categories';
@@ -32,7 +33,16 @@ export default function AdminPanel() {
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
   const [editingAnalysisId, setEditingAnalysisId] = useState<string | null>(null);
 
-  const [blogList, setBlogList] = useState(blogs);
+  const [blogList, setBlogList] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      const res = await fetch('/api/admin/blog');
+      const data = await res.json();
+      if (Array.isArray(data)) setBlogList(data);
+    };
+    fetchBlogs();
+  }, [tab]);
   const [categoryList, setCategoryList] = useState(CATEGORIES);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -41,6 +51,7 @@ export default function AdminPanel() {
     title: '', category: '', author: 'Uzman Analist Ekibi',
     date: new Date().toISOString().split('T')[0],
     excerpt: '', content: '', tags: '', coverImage: '',
+    featured: false,
   });
 
   const [analysisForm, setAnalysisForm] = useState({
@@ -49,24 +60,40 @@ export default function AdminPanel() {
     popular: false, price: '',
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaved(true);
-    setTimeout(() => {
-      setSaved(false);
+    try {
       if (tab === 'blog-new') {
-        if (editingBlogId) {
-          setBlogList(blogList.map(b => b.id === editingBlogId ? { ...b, ...blogForm } as any : b));
+        const method = editingBlogId ? 'PUT' : 'POST';
+        const body = editingBlogId ? { id: editingBlogId, ...blogForm } : blogForm;
+        
+        const res = await fetch('/api/admin/blog', {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          setEditingBlogId(null);
+          setTab('blog-list');
         } else {
-          const newId = blogForm.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').substring(0, 30) || 'yeni-blog';
-          setBlogList([{ id: newId, image: blogForm.coverImage, ...blogForm } as any, ...blogList]);
+          alert('Hata oluştu.');
         }
-        setEditingBlogId(null);
-        setTab('blog-list');
-      } else if (tab === 'analysis-new') {
-        setEditingAnalysisId(null);
-        setTab('analysis-list');
       }
-    }, 800);
+      // Add similar for analysis if needed...
+    } catch (err) {
+      alert('Bağlantı hatası.');
+    } finally {
+      setSaved(false);
+    }
+  };
+
+  const handleDeleteBlog = async (id: string) => {
+    if (!confirm('Bu yazıyı silmek istediğinize emin misiniz?')) return;
+    const res = await fetch(`/api/admin/blog?id=${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      setBlogList(blogList.filter(b => b.id !== id));
+    }
   };
 
   const handleEditBlog = (post: typeof blogs[0]) => {
@@ -79,7 +106,8 @@ export default function AdminPanel() {
       excerpt: post.excerpt || '',
       content: post.content || '',
       tags: 'analiz, sektör, uzmanlık',
-      coverImage: (post as any).coverImage || (post as any).image || '',
+      coverImage: post.coverImage || (post as any).image || '',
+      featured: post.featured || false,
     });
     setTab('blog-new');
   };
@@ -106,6 +134,7 @@ export default function AdminPanel() {
       title: '', category: '', author: 'Uzman Analist Ekibi',
       date: new Date().toISOString().split('T')[0],
       excerpt: '', content: '', tags: '', coverImage: '',
+      featured: false,
     });
     setTab('blog-new');
   };
@@ -329,6 +358,7 @@ export default function AdminPanel() {
                     <div className={styles.formGroup}><label className={styles.label}>Kategori *</label><select className={styles.select} value={blogForm.category} onChange={e => setBlogForm({ ...blogForm, category: e.target.value })}><option value="">Seçin...</option>{categoryList.map(c => <option key={c}>{c}</option>)}</select></div>
                     <div className={styles.formGroup}><label className={styles.label}>Yazar</label><input className={styles.input} value={blogForm.author} onChange={e => setBlogForm({ ...blogForm, author: e.target.value })} /></div>
                     <div className={styles.formGroup}><label className={styles.label}>Yayın Tarihi</label><input type="date" className={styles.input} value={blogForm.date} onChange={e => setBlogForm({ ...blogForm, date: e.target.value })} /></div>
+                    <div className={styles.formGroup} style={{ marginTop: '10px' }}><label className={styles.checkLabel}><input type="checkbox" checked={blogForm.featured} onChange={e => setBlogForm({ ...blogForm, featured: e.target.checked })} /> <strong>Öne Çıkan Yazı</strong></label></div>
                   </div>
                   <div className={styles.sideCard}>
                     <h3 className={styles.sideTitle}>Medya</h3>
@@ -401,7 +431,7 @@ export default function AdminPanel() {
                     <div className={styles.tableActions}>
                       <button className={styles.editBtn} onClick={() => { setBlogForm({...post, coverImage: (post as any).coverImage || (post as any).image || ''} as any); setShowPreviewModal(true); }}><Eye size={14} /></button>
                       <button className={styles.editBtn} onClick={() => handleEditBlog(post)}><PenSquare size={14} /></button>
-                      <button className={styles.deleteBtn} onClick={() => setBlogList(blogList.filter(b => b.id !== post.id))}><Trash2 size={14} /></button>
+                      <button className={styles.deleteBtn} onClick={() => handleDeleteBlog(post.id)}><Trash2 size={14} /></button>
                     </div>
                   </div>
                 ))}

@@ -33,6 +33,7 @@ model BlogPost {
   excerpt    String
   content    String
   coverImage String?
+  featured   Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
