@@ -103,13 +103,6 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           </div>
         </header>
 
-        <div className={styles.heroImageContainer}>
-          <img 
-            src="https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?q=80&w=2070&auto=format&fit=crop" 
-            alt={service.title}
-            className={styles.heroImage}
-          />
-        </div>
 
         <div className={styles.layout}>
           <div className={styles.bodyTextContainer}>
