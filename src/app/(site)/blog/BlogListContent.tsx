@@ -34,10 +34,14 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
 
   // Find the manually selected featured post, or fallback to the latest one
   const featured = blogs.find(b => b.featured) || blogs[0];
-  const rest = blogs.filter(b => b.id !== featured.id);
   
-  const filtered = rest.filter(b => {
-    const matchCat = activeCat === 'Tümü' || b.category === activeCat;
+  // Only hide the featured post from the grid if NO category/search filter is active
+  // This prevents categories with only one post (the featured one) from appearing empty
+  const isFiltered = activeCat !== 'Tümü' || search.trim() !== '';
+  const displayBlogs = isFiltered ? blogs : blogs.filter(b => b.id !== featured.id);
+
+  const filtered = displayBlogs.filter(b => {
+    const matchCat = activeCat === 'Tümü' || b.category?.trim().toLowerCase() === activeCat.trim().toLowerCase();
     const matchSearch = !search || b.title.toLowerCase().includes(search.toLowerCase()) || b.excerpt.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
