@@ -14,15 +14,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   let service: any = null;
   
   try {
-    service = await prisma.analysis.findUnique({
-      where: { id: resolvedParams.slug }
+    service = await prisma.analysis.findFirst({
+      where: { 
+        OR: [
+          { id: resolvedParams.slug },
+          { slug: resolvedParams.slug }
+        ]
+      }
     });
     
     if (!service) {
-      service = mockServices.find(s => s.id === resolvedParams.slug);
+      service = mockServices.find(s => s.id === resolvedParams.slug || s.slug === resolvedParams.slug);
     }
   } catch (err) {
-    service = mockServices.find(s => s.id === resolvedParams.slug);
+    service = mockServices.find(s => s.id === resolvedParams.slug || s.slug === resolvedParams.slug);
   }
 
   if (!service) return { title: 'Bulunamadı' };
@@ -39,29 +44,34 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   let popularServices: any[] = [];
 
   try {
-    service = await prisma.analysis.findUnique({
-      where: { id: resolvedParams.slug }
+    service = await prisma.analysis.findFirst({
+      where: { 
+        OR: [
+          { id: resolvedParams.slug },
+          { slug: resolvedParams.slug }
+        ]
+      }
     });
 
     if (!service) {
-      service = mockServices.find(s => s.id === resolvedParams.slug);
+      service = mockServices.find(s => s.id === resolvedParams.slug || s.slug === resolvedParams.slug);
     }
 
     popularServices = await prisma.analysis.findMany({
       where: {
         popular: true,
-        NOT: { id: resolvedParams.slug }
+        NOT: { id: service?.id || resolvedParams.slug }
       },
       take: 5
     });
 
     if (popularServices.length === 0) {
-      popularServices = mockServices.filter(s => s.popular && s.id !== resolvedParams.slug).slice(0, 5);
+      popularServices = mockServices.filter(s => s.popular && s.id !== (service?.id || resolvedParams.slug)).slice(0, 5);
     }
   } catch (error) {
     console.warn("Analysis DB error, falling back to mock:", error);
-    service = mockServices.find(s => s.id === resolvedParams.slug);
-    popularServices = mockServices.filter(s => s.popular && s.id !== resolvedParams.slug).slice(0, 5);
+    service = mockServices.find(s => s.id === resolvedParams.slug || s.slug === resolvedParams.slug);
+    popularServices = mockServices.filter(s => s.popular && s.id !== (service?.id || resolvedParams.slug)).slice(0, 5);
   }
 
   if (!service) {
@@ -174,7 +184,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <h3 className={styles.popularTitle}>Diğer Popüler Analizler</h3>
               <div className={styles.popularList}>
                 {popularServices.map(pop => (
-                  <Link href={`/analizler/${pop.id}`} key={pop.id} className={styles.popularItem}>
+                  <Link href={`/analizler/${pop.slug || pop.id}`} key={pop.id} className={styles.popularItem}>
                     <span className={styles.popularIco}>🧪</span>
                     <span className={styles.popularName}>{pop.title}</span>
                     <ArrowRight size={14} className={styles.popularArr} />

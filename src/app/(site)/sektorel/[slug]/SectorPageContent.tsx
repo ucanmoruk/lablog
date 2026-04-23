@@ -123,7 +123,7 @@ export default function SectorPageContent({ sector, sectorServices, relatedSecto
             <h2 className={styles.secH2}>Tüm {sector.shortName} Analizleri</h2>
             <div className={styles.allTestsGrid}>
               {sectorServices.map(s => (
-                <Link href={`/analizler/${s.id}`} key={s.id} className={styles.allTestCard}>
+                <Link href={`/analizler/${s.slug || s.id}`} key={s.id} className={styles.allTestCard}>
                   <div className={styles.allTestHeader}>
                     <h3 className={styles.allTestTitle}>{s.title}</h3>
                     {s.popular && <span className={styles.popularBadge}><Star size={11} /> Popüler</span>}

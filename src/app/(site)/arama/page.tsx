@@ -69,7 +69,7 @@ function SearchResults() {
                   <div className={styles.cardInfo}>
                     <span className={styles.category}>{service.category}</span>
                     <h3 className={styles.cardTitle}>
-                      <Link href={`/analizler/${service.id}`} style={{textDecoration: 'none', color: 'inherit'}}>{service.title}</Link>
+                      <Link href={`/analizler/${service.slug || service.id}`} style={{textDecoration: 'none', color: 'inherit'}}>{service.title}</Link>
                     </h3>
                     <p className={styles.cardDesc}>{service.description}</p>
                     {service.standards && (
