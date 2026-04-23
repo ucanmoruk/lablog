@@ -16,6 +16,7 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
   const [dropOpen, setDropOpen] = useState(false);
   const [modal, setModal] = useState<{open:boolean; svc:string; success:boolean}>({ open:false, svc:"", success:false });
   const [form, setForm] = useState({ name:"", phone:"", company:"", email:"", note:"" });
+  const [toast, setToast] = useState(false);
   const { addQuote } = useQuote();
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -165,6 +166,8 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
                                     e.stopPropagation(); 
                                     addQuote({ id: r.id, title: r.title, category: r.category, price: 'İstek Üzerine' });
                                     setDropOpen(false);
+                                    setToast(true);
+                                    setTimeout(() => setToast(false), 5000);
                                 }}
                             >
                                 Sepete Ekle +
@@ -174,7 +177,7 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
                       ))}
                       <div className={styles.dropFoot}>
                         <span className={styles.dropFootTxt}>{results.length} hizmet bulundu</span>
-                        <button className={styles.dropFootBtn} onClick={() => router.push('/search')}>Tümünü Gör</button>
+                        <button className={styles.dropFootBtn} onClick={() => router.push(`/search?q=${encodeURIComponent(query)}`)}>Tümünü Gör</button>
                       </div>
                     </>
                   )}
@@ -232,6 +235,13 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className={styles.cartToast}>
+          <span className={styles.cartToastMsg}>Hizmet listeye eklendi.</span>
+          <Link href="/teklif-iste" className={styles.cartToastBtn}>Listeyi Görüntüle</Link>
         </div>
       )}
     </>
