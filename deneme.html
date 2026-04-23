@@ -1301,6 +1301,48 @@
             letter-spacing: -0.1px;
         }
 
+        /* ── AUTH SPECIFIC ── */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-login {
+            background: transparent;
+            color: var(--666);
+            border: none;
+            padding: 8px 4px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: color 0.15s;
+            letter-spacing: -0.1px;
+        }
+
+        .nav-login:hover {
+            color: var(--black);
+        }
+
+        .auth-switch {
+            font-size: 13px;
+            color: var(--666);
+            text-align: center;
+            margin-top: 16px;
+            font-weight: 300;
+        }
+
+        .auth-switch a {
+            color: var(--blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
         /* ── RESPONSIVE ── */
         @media (max-width: 960px) {
             .nav-links {
@@ -1365,6 +1407,9 @@
             .modal {
                 border-radius: var(--r16);
             }
+            .nav-actions {
+                gap: 8px;
+            }
         }
 
         @media (max-width: 600px) {
@@ -1378,6 +1423,9 @@
 
             h1 {
                 font-size: 36px;
+            }
+            .nav-login {
+                font-size: 12px;
             }
         }
     </style>
@@ -1394,7 +1442,10 @@
             <li><a href="#hizmetler">Hizmetler</a></li>
             <li><a href="#blog">Rehberler</a></li>
         </ul>
-        <button class="nav-cta" onclick="openModal('Genel Analiz Talebi')">Teklif Al</button>
+        <div class="nav-actions">
+            <button class="nav-login" onclick="openAuthModal('login')">Giriş Yap</button>
+            <button class="nav-cta" onclick="openModal('Genel Analiz Talebi')">Teklif Al</button>
+        </div>
     </nav>
 
     <!-- HERO -->
@@ -1729,6 +1780,53 @@
                 <p>En geç <strong>24 saat</strong> içinde e-posta ve telefon ile dönüş yapacağız.<br><br>Acil
                     ihtiyaçlarınız için:<br><strong>WhatsApp: 0___ ___ __ __</strong></p>
             </div>
+
+            <!-- AUTH SECTIONS -->
+            <div id="mauth" style="display:none">
+                <div id="auth-login">
+                    <div class="modal-top">
+                        <button class="modal-close" onclick="closeModal()">✕</button>
+                        <div class="m-tag">Müşteri Girişi</div>
+                        <h2>Hesabınıza giriş yapın</h2>
+                        <p class="m-svc">Laboratuvardan platformuna hoş geldiniz.</p>
+                    </div>
+                    <div class="modal-body">
+                        <div class="fg">
+                            <label>E-posta Adresi</label>
+                            <input type="email" id="l-email" placeholder="adres@firma.com" />
+                        </div>
+                        <div class="fg">
+                            <label>Şifre</label>
+                            <input type="password" id="l-pass" placeholder="••••••••" />
+                        </div>
+                        <button class="m-submit" onclick="handleAuthSubmit('login')">Giriş Yap</button>
+                        <div class="auth-switch">
+                            Hesabınız yok mu? <a href="#" onclick="toggleAuth('register');return false">Kayıt Olun</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="auth-register" style="display:none">
+                    <div class="modal-top">
+                        <button class="modal-close" onclick="closeModal()">✕</button>
+                        <div class="m-tag">Yeni Kayıt</div>
+                        <h2>Müşteri hesabı oluşturun</h2>
+                        <p class="m-svc">Analiz süreçlerinizi dijital olarak yönetmeye başlayın.</p>
+                    </div>
+                    <div class="modal-body">
+                        <div class="fg-2">
+                            <div class="fg"><label>Ad Soyad</label><input type="text" id="r-name" placeholder="Ahmet Yılmaz" /></div>
+                            <div class="fg"><label>Telefon</label><input type="tel" id="r-phone" placeholder="0532 000 00 00" /></div>
+                        </div>
+                        <div class="fg"><label>Firma Adı</label><input type="text" id="r-company" placeholder="Şirket Adı Ltd. Şti." /></div>
+                        <div class="fg"><label>E-posta</label><input type="email" id="r-email" placeholder="adres@firma.com" /></div>
+                        <div class="fg"><label>Şifre</label><input type="password" id="r-pass" placeholder="En az 8 karakter" /></div>
+                        <button class="m-submit" onclick="handleAuthSubmit('register')">Hesap Oluştur ve Giriş Yap</button>
+                        <div class="auth-switch">
+                            Zaten hesabınız var mı? <a href="#" onclick="toggleAuth('login');return false">Giriş Yapın</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1859,6 +1957,46 @@
             document.getElementById('mform').style.display = 'none';
             document.getElementById('msuccess').classList.add('show');
         }
+
+        /* ── AUTH ── */
+        function openAuthModal(type) {
+            document.getElementById('mform').style.display = 'none';
+            document.getElementById('msuccess').classList.remove('show');
+            document.getElementById('mauth').style.display = 'block';
+            toggleAuth(type);
+            document.getElementById('overlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function toggleAuth(type) {
+            document.getElementById('auth-login').style.display = type === 'login' ? 'block' : 'none';
+            document.getElementById('auth-register').style.display = type === 'register' ? 'block' : 'none';
+        }
+
+        function handleAuthSubmit(type) {
+            if (type === 'login') {
+                const e = document.getElementById('l-email').value.trim();
+                const p = document.getElementById('l-pass').value.trim();
+                if (!e || !p) { alert('Lütfen e-posta ve şifrenizi girin.'); return; }
+                alert('Giriş başarılı! (Demo)');
+            } else {
+                const n = document.getElementById('r-name').value.trim();
+                const e = document.getElementById('r-email').value.trim();
+                if (!n || !e) { alert('Lütfen gerekli alanları doldurun.'); return; }
+                alert('Kaydınız oluşturuldu! (Demo)');
+            }
+            closeModal();
+        }
+
+        // Existing closeModal wrapper update
+        const originalCloseModal = closeModal;
+        closeModal = function() {
+            originalCloseModal();
+            setTimeout(() => {
+                document.getElementById('mauth').style.display = 'none';
+                document.getElementById('mform').style.display = 'block';
+            }, 300);
+        };
     </script>
 </body>
 

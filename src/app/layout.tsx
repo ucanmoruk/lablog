@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { QuoteProvider } from "@/context/QuoteContext";
 
 export const metadata: Metadata = {
@@ -18,13 +16,10 @@ export default function RootLayout({
     <html lang="tr">
       <body>
         <QuoteProvider>
-          <Navbar />
-          <main style={{ minHeight: 'calc(100vh - 68px)' }}>
-            {children}
-          </main>
-          <Footer />
+          {children}
         </QuoteProvider>
       </body>
     </html>
   );
 }
+

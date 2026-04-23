@@ -235,6 +235,52 @@
   box-shadow: 0 4px 12px rgba(26, 86, 219, 0.25);
 }
 
+.userDropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 102, 204, 0.05);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 102, 204, 0.1);
+}
+
+.userMenuBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.userMenuBtn:hover {
+  background: rgba(0, 102, 204, 0.1);
+}
+
+.logoutIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #86868b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logoutIconBtn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
 @media (max-width: 1024px) {
   .inner {
     padding: 0 24px;
