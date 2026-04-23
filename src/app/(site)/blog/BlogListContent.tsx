@@ -76,7 +76,20 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
           {subscribed ? (
             <div className={styles.subscribedMsg}>✓ Abone oldunuz! Teşekkürler.</div>
           ) : (
-            <form className={styles.newsletterForm} onSubmit={e => { e.preventDefault(); setSubscribed(true); }}>
+            <form className={styles.newsletterForm} onSubmit={async e => { 
+              e.preventDefault(); 
+              try {
+                const res = await fetch('/api/newsletter', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email })
+                });
+                if (res.ok) setSubscribed(true);
+                else alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+              } catch (err) {
+                alert('Bağlantı hatası.');
+              }
+            }}>
               <input type="email" placeholder="E-posta adresiniz" value={email} onChange={e => setEmail(e.target.value)} required className={styles.newsletterInput} />
               <button type="submit" className={styles.newsletterBtn}>Abone Ol</button>
             </form>

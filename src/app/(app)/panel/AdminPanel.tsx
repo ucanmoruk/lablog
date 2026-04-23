@@ -11,7 +11,7 @@ import { blogs as mockBlogs } from '@/data/mockData';
 import { useEffect } from 'react';
 import styles from './panel.module.css';
 
-type Tab = 'dashboard' | 'blog-new' | 'blog-list' | 'analysis-new' | 'analysis-list' | 'quotes' | 'categories';
+type Tab = 'dashboard' | 'blog-new' | 'blog-list' | 'analysis-new' | 'analysis-list' | 'quotes' | 'categories' | 'newsletter';
 
 const CATEGORIES = ['Kozmetik', 'İlaç ve Hammadde', 'Tekstil ve Deri', 'Takviye Edici Gıda', 'Belgelendirme', 'Çevre ve Su', 'Ambalaj ve Plastik', 'Mikrobiyoloji'];
 const SECTORS = ['Kozmetik', 'İlaç ve Hammadde', 'Tekstil ve Deri', 'Gıda & Takviye Edici Gıda', 'Çevre ve Su', 'Ambalaj ve Plastik', 'Mikrobiyoloji', 'Belgelendirme'];
@@ -34,6 +34,7 @@ export default function AdminPanel() {
   const [editingAnalysisId, setEditingAnalysisId] = useState<string | null>(null);
 
   const [blogList, setBlogList] = useState<any[]>([]);
+  const [subscriberList, setSubscriberList] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -41,7 +42,13 @@ export default function AdminPanel() {
       const data = await res.json();
       if (Array.isArray(data)) setBlogList(data);
     };
+    const fetchSubscribers = async () => {
+      const res = await fetch('/api/admin/newsletter');
+      const data = await res.json();
+      if (Array.isArray(data)) setSubscriberList(data);
+    };
     fetchBlogs();
+    fetchSubscribers();
   }, [tab]);
   const [categoryList, setCategoryList] = useState(CATEGORIES);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -192,6 +199,10 @@ export default function AdminPanel() {
                 <MessageSquare size={18} /> Teklif Talepleri
                 {pendingQuotes.length > 0 && <span className={styles.navBadge}>{pendingQuotes.length}</span>}
               </button>
+              <button onClick={() => setTab('newsletter')} className={`${styles.navBtn} ${tab === 'newsletter' ? styles.active : ''}`}>
+                <Globe size={18} /> Bülten Aboneleri
+                {subscriberList.length > 0 && <span className={styles.navCount}>{subscriberList.length}</span>}
+              </button>
             </div>
             <div className={styles.navSection}>
               <div className={styles.navLabel}>Blog Yönetimi</div>
@@ -230,6 +241,7 @@ export default function AdminPanel() {
                   { label: 'Yayındaki Blog Yazısı', value: String(liveBlogPosts.length), icon: <FileText size={24} />, color: '#0066cc' },
                   { label: 'Yayındaki Analiz', value: String(liveServices.length), icon: <FlaskConical size={24} />, color: '#1d7843' },
                   { label: 'Bekleyen Teklif', value: String(pendingQuotes.length), icon: <MessageSquare size={24} />, color: '#b45309' },
+                  { label: 'Bülten Abonesi', value: String(subscriberList.length), icon: <Globe size={24} />, color: '#7c3aed' },
                 ].map(s => (
                   <div key={s.label} className={styles.statCard}>
                     <div className={styles.statIco} style={{ background: `${s.color}1a`, color: s.color }}>{s.icon}</div>
@@ -483,6 +495,33 @@ export default function AdminPanel() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Newsletter Subscribers */}
+          {tab === 'newsletter' && (
+            <div>
+              <div className={styles.pageHeader}>
+                <div><h1 className={styles.pageTitle}>Bülten Aboneleri</h1><p className={styles.pageDesc}>Haftalık bülteninize kayıt olan kullanıcı listesi.</p></div>
+              </div>
+              <div className={styles.listTable}>
+                <div className={styles.tableHead}><span>E-posta Adresi</span><span>Kayıt Tarihi</span><span>İşlem</span></div>
+                {subscriberList?.map(s => (
+                  <div key={s.id} className={styles.tableRow}>
+                    <span className={styles.tableTitle}>{s.email}</span>
+                    <span className={styles.tableDate}>{new Date(s.createdAt).toLocaleDateString('tr-TR')}</span>
+                    <div className={styles.tableActions}>
+                      <button className={styles.deleteBtn} onClick={async () => {
+                         if(confirm('Aboneyi silmek istediğinize emin misiniz?')) {
+                           await fetch(`/api/admin/newsletter?id=${s.id}`, { method: 'DELETE' });
+                           setSubscriberList(subscriberList.filter(sub => sub.id !== s.id));
+                         }
+                      }}><Trash2 size={14} /></button>
+                    </div>
+                  </div>
+                ))}
+                {(!subscriberList || subscriberList.length === 0) && <div className={styles.empty}>Henüz abone bulunmuyor.</div>}
               </div>
             </div>
           )}
