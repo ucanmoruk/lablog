@@ -35,6 +35,7 @@ export default function AdminPanel() {
 
   const [blogList, setBlogList] = useState<any[]>([]);
   const [subscriberList, setSubscriberList] = useState<any[]>([]);
+  const [quoteList, setQuoteList] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -47,8 +48,14 @@ export default function AdminPanel() {
       const data = await res.json();
       if (Array.isArray(data)) setSubscriberList(data);
     };
+    const fetchQuotes = async () => {
+        const res = await fetch('/api/admin/quotes');
+        const data = await res.json();
+        if (Array.isArray(data)) setQuoteList(data);
+    };
     fetchBlogs();
     fetchSubscribers();
+    fetchQuotes();
   }, [tab]);
   const [categoryList, setCategoryList] = useState(CATEGORIES);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -197,7 +204,7 @@ export default function AdminPanel() {
               </button>
               <button onClick={() => setTab('quotes')} className={`${styles.navBtn} ${tab === 'quotes' ? styles.active : ''}`}>
                 <MessageSquare size={18} /> Teklif Talepleri
-                {pendingQuotes.length > 0 && <span className={styles.navBadge}>{pendingQuotes.length}</span>}
+                {quoteList.length > 0 && <span className={styles.navBadge}>{quoteList.length}</span>}
               </button>
               <button onClick={() => setTab('newsletter')} className={`${styles.navBtn} ${tab === 'newsletter' ? styles.active : ''}`}>
                 <Globe size={18} /> Bülten Aboneleri
@@ -240,7 +247,7 @@ export default function AdminPanel() {
                 {[
                   { label: 'Yayındaki Blog Yazısı', value: String(liveBlogPosts.length), icon: <FileText size={24} />, color: '#0066cc' },
                   { label: 'Yayındaki Analiz', value: String(liveServices.length), icon: <FlaskConical size={24} />, color: '#1d7843' },
-                  { label: 'Bekleyen Teklif', value: String(pendingQuotes.length), icon: <MessageSquare size={24} />, color: '#b45309' },
+                  { label: 'Bekleyen Teklif', value: String(quoteList.length), icon: <MessageSquare size={24} />, color: '#b45309' },
                   { label: 'Bülten Abonesi', value: String(subscriberList.length), icon: <Globe size={24} />, color: '#7c3aed' },
                 ].map(s => (
                   <div key={s.label} className={styles.statCard}>
@@ -273,60 +280,44 @@ export default function AdminPanel() {
 
               <div className={styles.listTable}>
                 <div className={styles.quoteTableHead}>
-                  <span>Müşteri</span><span>Analizler</span><span>Tarih</span><span>Durum</span><span>İşlem</span>
+                  <span>Müşteri</span><span>İletişim / Mesaj</span><span>Tarih</span><span>İşlem</span>
                 </div>
-                {MOCK_QUOTES.map(q => (
+                {quoteList.map(q => (
                   <div key={q.id} className={styles.quoteTableRow} onClick={() => setSelectedQuote(selectedQuote === q.id ? null : q.id)}>
                     <div>
-                      <div className={styles.tableTitle}>{q.user}</div>
-                      <div className={styles.tableSub}>{q.company}</div>
+                      <div className={styles.tableTitle}>{q.name}</div>
+                      <div className={styles.tableSub}>{q.email}</div>
                     </div>
                     <div>
-                      <div className={styles.tableTitle}>{q.items[0]}{q.items.length > 1 && <span className={styles.moreTag}>+{q.items.length - 1}</span>}</div>
+                      <div className={styles.tableTitle} style={{fontSize:"0.85rem", opacity:0.8}}>{q.message?.slice(0, 50)}...</div>
                     </div>
-                    <div className={styles.tableDate}>{q.date}</div>
-                    <div>
-                      <span className={q.price !== '—' ? styles.statusApproved : styles.statusPending}>
-                        {q.price !== '—' ? 'Teklif İletildi' : 'Beklemede'}
-                      </span>
-                    </div>
+                    <div className={styles.tableDate}>{new Date(q.createdAt).toLocaleDateString('tr-TR')}</div>
                     <div className={styles.tableActions} onClick={e => e.stopPropagation()}>
-                      {q.price === '—' && (
-                        <button className={styles.approveBtn} onClick={() => setQuoteAction({ id: q.id, type: 'price' })}>
-                          <Plus size={14} /> Fiyat Teklifi Ver
-                        </button>
-                      )}
+                       <button className={styles.deleteBtn} onClick={async () => {
+                           if(confirm('Talebi silmek istediğinize emin misiniz?')) {
+                               await fetch(`/api/admin/quotes?id=${q.id}`, { method: 'DELETE' });
+                               setQuoteList(quoteList.filter(item => item.id !== q.id));
+                           }
+                       }}><Trash2 size={14} /></button>
                     </div>
                   </div>
                 ))}
-                {MOCK_QUOTES.map(q => selectedQuote === q.id && (
+                {quoteList.length === 0 && <div className={styles.empty}>Henüz teklif talebi bulunmuyor.</div>}
+              </div>
+              {quoteList.map(q => selectedQuote === q.id && (
                   <div key={`detail-${q.id}`} className={styles.quoteDetail}>
                     <div className={styles.quoteDetailGrid}>
                       <div>
-                        <h3 className={styles.quoteDetailTitle}>{q.id} — Talep Detayı</h3>
+                        <h3 className={styles.quoteDetailTitle}>Talep Detayı</h3>
                         <div className={styles.quoteDetailMeta}>
-                          <span><User size={14} /> {q.user}</span>
-                          <span><Globe size={14} /> {q.company}</span>
+                          <span><User size={14} /> {q.name}</span>
                           <span><MessageSquare size={14} /> {q.email}</span>
-                          <span><Clock size={14} /> {q.date}</span>
+                          <span>{q.phone && <><Clock size={14} /> {q.phone}</>}</span>
                         </div>
-                        <div className={styles.quoteItemList}>
-                          <div className={styles.quoteItemLabel}>Analiz Talepleri:</div>
-                          {q.items.map(item => (
-                            <div key={item} className={styles.quoteItemRow}>
-                              <FlaskConical size={14} /> {item}
-                            </div>
-                          ))}
+                        <div style={{marginTop:"20px", background:"#f9f9f9", padding:"15px", borderRadius:"8px", fontSize:"0.95rem", lineHeight:1.6}}>
+                            {q.message}
                         </div>
-                        {q.price !== '—' && <div className={styles.quotePrice}>Gönderilen Teklif: <strong>{q.price}</strong></div>}
                       </div>
-                      {q.price === '—' && (
-                        <div className={styles.quoteActions}>
-                          <button className={styles.approveBtnLg} onClick={() => setQuoteAction({ id: q.id, type: 'price' })}>
-                            <Save size={18} /> Fiyat Teklifi Hazırla
-                          </button>
-                        </div>
-                      )}
                     </div>
                   </div>
                 ))}
