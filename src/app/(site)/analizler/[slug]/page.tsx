@@ -7,11 +7,24 @@ import { Shield, Clock, Beaker, ArrowRight, ChevronLeft, User, Calendar, Award, 
 import Link from 'next/link';
 
 
+import { services as mockServices } from '@/data/mockData';
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const service = await prisma.analysis.findUnique({
-    where: { id: resolvedParams.slug }
-  });
+  let service: any = null;
+  
+  try {
+    service = await prisma.analysis.findUnique({
+      where: { id: resolvedParams.slug }
+    });
+    
+    if (!service) {
+      service = mockServices.find(s => s.id === resolvedParams.slug);
+    }
+  } catch (err) {
+    service = mockServices.find(s => s.id === resolvedParams.slug);
+  }
+
   if (!service) return { title: 'Bulunamadı' };
   
   return {
@@ -22,21 +35,38 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const service = await prisma.analysis.findUnique({
-    where: { id: resolvedParams.slug }
-  });
+  let service: any = null;
+  let popularServices: any[] = [];
+
+  try {
+    service = await prisma.analysis.findUnique({
+      where: { id: resolvedParams.slug }
+    });
+
+    if (!service) {
+      service = mockServices.find(s => s.id === resolvedParams.slug);
+    }
+
+    popularServices = await prisma.analysis.findMany({
+      where: {
+        popular: true,
+        NOT: { id: resolvedParams.slug }
+      },
+      take: 5
+    });
+
+    if (popularServices.length === 0) {
+      popularServices = mockServices.filter(s => s.popular && s.id !== resolvedParams.slug).slice(0, 5);
+    }
+  } catch (error) {
+    console.warn("Analysis DB error, falling back to mock:", error);
+    service = mockServices.find(s => s.id === resolvedParams.slug);
+    popularServices = mockServices.filter(s => s.popular && s.id !== resolvedParams.slug).slice(0, 5);
+  }
 
   if (!service) {
     notFound();
   }
-
-  const popularServices = await prisma.analysis.findMany({
-    where: {
-      popular: true,
-      NOT: { id: service.id }
-    },
-    take: 5
-  });
 
   return (
     <main className={styles.main}>
