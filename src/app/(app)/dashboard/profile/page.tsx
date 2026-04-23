@@ -34,17 +34,6 @@ export default function ProfilePage() {
     }
   }, []);
 
-  const fetchQuotes = async (email: string) => {
-    try {
-      const res = await fetch(`/api/quotes/my?email=${email}`);
-      const data = await res.json();
-      if (Array.isArray(data)) setMyQuotes(data);
-    } catch (err) {
-      console.error("Quotes could not be fetched.");
-    } finally {
-      setLoadingQuotes(false);
-    }
-  };
 
   const handleSaveProfile = () => {
     setSaveStatus('saving');

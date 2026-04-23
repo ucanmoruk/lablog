@@ -54,7 +54,7 @@ export default async function Home() {
       take: 3
     });
 
-    latestBlogs = dbBlogs.map(b => ({
+    latestBlogs = (dbBlogs as any[]).map(b => ({
       id: b.id,
       slug: b.slug,
       title: b.title,
@@ -64,7 +64,7 @@ export default async function Home() {
 
     // Eğer DB boşsa mock'ları kullan
     if (latestBlogs.length === 0) {
-      latestBlogs = mockBlogs.slice(0, 3).map(b => ({
+      latestBlogs = (mockBlogs as any[]).slice(0, 3).map(b => ({
         id: b.id,
         slug: b.slug,
         title: b.title,
@@ -74,7 +74,7 @@ export default async function Home() {
     }
   } catch (error) {
     console.warn("Database connection failed, falling back to mock data:", error);
-    latestBlogs = mockBlogs.slice(0, 3).map(b => ({
+    latestBlogs = (mockBlogs as any[]).slice(0, 3).map(b => ({
       id: b.id,
       slug: b.slug,
       title: b.title,
