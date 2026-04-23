@@ -65,6 +65,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
     popularServices = await prisma.analysis.findMany({
       where: {
+        category: service?.category || undefined,
         popular: true,
         NOT: { id: service?.id || resolvedParams.slug }
       },
@@ -72,12 +73,35 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
     });
 
     if (popularServices.length === 0) {
-      popularServices = mockServices.filter(s => s.popular && s.id !== (service?.id || resolvedParams.slug)).slice(0, 5);
+      popularServices = mockServices.filter(s => 
+        s.category === service?.category && 
+        s.popular && 
+        s.id !== (service?.id || resolvedParams.slug)
+      ).slice(0, 5);
+    }
+    
+    // Eğer hala boşsa genel popülerleri getir
+    if (popularServices.length === 0) {
+        popularServices = mockServices.filter(s => s.popular && s.id !== (service?.id || resolvedParams.slug)).slice(0, 5);
     }
   } catch (error) {
     console.warn("Analysis DB error, falling back to mock:", error);
     service = mockServices.find(s => s.id === resolvedParams.slug || s.slug === resolvedParams.slug);
-    popularServices = mockServices.filter(s => s.popular && s.id !== (service?.id || resolvedParams.slug)).slice(0, 5);
+    popularServices = mockServices.filter(s => s.category === service?.category && s.popular && s.id !== (service?.id || resolvedParams.slug)).slice(0, 5);
+  }
+
+  // Blogları çek
+  let latestBlogs = [];
+  try {
+    latestBlogs = await prisma.blogPost.findMany({
+        orderBy: { date: 'desc' },
+        take: 3
+    });
+    if (latestBlogs.length === 0) {
+        latestBlogs = require('@/data/mockData').blogs.slice(0, 3);
+    }
+  } catch (err) {
+    latestBlogs = require('@/data/mockData').blogs.slice(0, 3);
   }
 
   if (!service) {
@@ -180,12 +204,27 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             </div>
 
             <div className={styles.popularCard}>
-              <h3 className={styles.popularTitle}>Diğer Popüler Analizler</h3>
+              <h3 className={styles.popularTitle}>En Popüler Analizler</h3>
               <div className={styles.popularList}>
                 {popularServices.map(pop => (
                   <Link href={`/analizler/${pop.slug || pop.id}`} key={pop.id} className={styles.popularItem}>
                     <span className={styles.popularIco}>🧪</span>
                     <span className={styles.popularName}>{pop.title}</span>
+                    <ArrowRight size={14} className={styles.popularArr} />
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.blogCard}>
+              <h3 className={styles.popularTitle}>Güncel Bloglar</h3>
+              <div className={styles.blogList}>
+                {latestBlogs.map((b: any) => (
+                  <Link href={`/blog/${b.slug || b.id}`} key={b.id} className={styles.blogItem}>
+                    <div className={styles.blogItemInfo}>
+                        <span className={styles.blogItemCat}>{b.category}</span>
+                        <h4 className={styles.blogItemTitle}>{b.title}</h4>
+                    </div>
                     <ArrowRight size={14} className={styles.popularArr} />
                   </Link>
                 ))}
