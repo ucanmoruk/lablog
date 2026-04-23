@@ -79,27 +79,27 @@ export default function Navbar() {
                 </div>
                 <div className={styles.megaCol}>
                   <span className={styles.megaLabel}>Regülasyon</span>
-                  <Link href="/search?q=reach" className={styles.megaItem}>REACH & SVHC</Link>
-                  <Link href="/search?q=rohs" className={styles.megaItem}>RoHS Direktifi</Link>
-                  <Link href="/search?q=tareks" className={styles.megaItem}>TAREKS Denetimi</Link>
-                  <Link href="/search?q=çevre" className={styles.megaItem}>Çevre & Su Analizi</Link>
+                  <Link href="/arama?q=reach" className={styles.megaItem}>REACH & SVHC</Link>
+                  <Link href="/arama?q=rohs" className={styles.megaItem}>RoHS Direktifi</Link>
+                  <Link href="/arama?q=tareks" className={styles.megaItem}>TAREKS Denetimi</Link>
+                  <Link href="/arama?q=çevre" className={styles.megaItem}>Çevre & Su Analizi</Link>
                 </div>
                 <div className={styles.megaCol}>
                   <span className={styles.megaLabel}>Hızlı Bağlantı</span>
-                  <Link href="/search" className={styles.megaItem}>Tüm Analizler</Link>
+                  <Link href="/arama" className={styles.megaItem}>Tüm Analizler</Link>
                   <Link href="/blog" className={styles.megaItem}>Sektörel Yayınlar</Link>
-                  <Link href="/quote-list" className={styles.megaItem}>Teklif Listesi</Link>
+                  <Link href="/teklif-listesi" className={styles.megaItem}>Teklif Listesi</Link>
                 </div>
               </div>
             </div>
-            <Link href="/search" className={styles.link}>Analizler</Link>
+            <Link href="/arama" className={styles.link}>Analizler</Link>
             <Link href="/blog" className={styles.link}>Blog</Link>
-            <Link href="/about" className={styles.link}>Hakkımızda</Link>
+            <Link href="/hakkimizda" className={styles.link}>Hakkımızda</Link>
           </nav>
 
           {/* Actions */}
           <div className={styles.actions}>
-            <Link href="/quote-list" className={styles.quoteBtn} title="Teklif Listem">
+            <Link href="/teklif-listesi" className={styles.quoteBtn} title="Teklif Listem">
               <ShoppingBag size={18} strokeWidth={2} />
               {quotes.length > 0 && (
                 <span className={styles.quoteCount}>{quotes.length}</span>

@@ -16,7 +16,7 @@ export default function QuoteListPage() {
           <p style={{ color: 'var(--text-secondary)', marginTop: '16px', marginBottom: '24px' }}>
             Hizmetlerimizi inceleyerek teklif almak istediğiniz analizleri ekleyebilirsiniz.
           </p>
-          <Link href="/search" className={styles.primaryBtn} style={{ display: 'inline-block', padding: '12px 32px' }}>
+          <Link href="/arama" className={styles.primaryBtn} style={{ display: 'inline-block', padding: '12px 32px' }}>
             Hizmetleri İncele
           </Link>
         </div>

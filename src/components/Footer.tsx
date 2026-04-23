@@ -30,34 +30,34 @@ export default function Footer() {
           <div className={styles.col}>
             <h4 className={styles.colTitle}>Hizmet Alanları</h4>
             <ul className={styles.list}>
-              <li><Link href="/search?q=kozmetik" className={styles.footerLink}>Kozmetik Analizleri</Link></li>
-              <li><Link href="/search?q=ilaç" className={styles.footerLink}>İlaç & Hammadde</Link></li>
-              <li><Link href="/search?q=gıda" className={styles.footerLink}>Gıda & Takviye Edici Gıda</Link></li>
-              <li><Link href="/search?q=tekstil" className={styles.footerLink}>Tekstil & Deri</Link></li>
-              <li><Link href="/search?q=çevre" className={styles.footerLink}>Çevre & Su Analizleri</Link></li>
-              <li><Link href="/search?q=ambalaj" className={styles.footerLink}>Ambalaj & Plastik</Link></li>
+              <li><Link href="/arama?q=kozmetik" className={styles.footerLink}>Kozmetik Analizleri</Link></li>
+              <li><Link href="/arama?q=ilaç" className={styles.footerLink}>İlaç & Hammadde</Link></li>
+              <li><Link href="/arama?q=gıda" className={styles.footerLink}>Gıda & Takviye Edici Gıda</Link></li>
+              <li><Link href="/arama?q=tekstil" className={styles.footerLink}>Tekstil & Deri</Link></li>
+              <li><Link href="/arama?q=çevre" className={styles.footerLink}>Çevre & Su Analizleri</Link></li>
+              <li><Link href="/arama?q=ambalaj" className={styles.footerLink}>Ambalaj & Plastik</Link></li>
             </ul>
           </div>
           <div className={styles.col}>
             <h4 className={styles.colTitle}>Regülasyon & Test</h4>
             <ul className={styles.list}>
-              <li><Link href="/search?q=reach" className={styles.footerLink}>REACH & SVHC Taraması</Link></li>
-              <li><Link href="/search?q=rohs" className={styles.footerLink}>RoHS Uygunluk Analizi</Link></li>
-              <li><Link href="/search?q=tareks" className={styles.footerLink}>TAREKS Denetim Desteği</Link></li>
-              <li><Link href="/search?q=mikrobiyoloji" className={styles.footerLink}>Mikrobiyolojik Testler</Link></li>
-              <li><Link href="/search?q=ağır metal" className={styles.footerLink}>Ağır Metal (ICP-MS)</Link></li>
-              <li><Link href="/search?q=stabilite" className={styles.footerLink}>Stabilite Çalışmaları</Link></li>
+              <li><Link href="/arama?q=reach" className={styles.footerLink}>REACH & SVHC Taraması</Link></li>
+              <li><Link href="/arama?q=rohs" className={styles.footerLink}>RoHS Uygunluk Analizi</Link></li>
+              <li><Link href="/arama?q=tareks" className={styles.footerLink}>TAREKS Denetim Desteği</Link></li>
+              <li><Link href="/arama?q=mikrobiyoloji" className={styles.footerLink}>Mikrobiyolojik Testler</Link></li>
+              <li><Link href="/arama?q=ağır metal" className={styles.footerLink}>Ağır Metal (ICP-MS)</Link></li>
+              <li><Link href="/arama?q=stabilite" className={styles.footerLink}>Stabilite Çalışmaları</Link></li>
             </ul>
           </div>
           <div className={styles.col}>
             <h4 className={styles.colTitle}>Kurumsal</h4>
             <ul className={styles.list}>
-              <li><Link href="/about" className={styles.footerLink}>Hakkımızda</Link></li>
+              <li><Link href="/hakkimizda" className={styles.footerLink}>Hakkımızda</Link></li>
               <li><Link href="/blog" className={styles.footerLink}>Blog & Yayınlar</Link></li>
-              <li><Link href="/faq" className={styles.footerLink}>Sıkça Sorulan Sorular</Link></li>
-              <li><Link href="/contact" className={styles.footerLink}>İletişim</Link></li>
+              <li><Link href="/sikca-sorulan-sorular" className={styles.footerLink}>Sıkça Sorulan Sorular</Link></li>
+              <li><Link href="/iletisim" className={styles.footerLink}>İletişim</Link></li>
               <li><Link href="/auth/register" className={styles.footerLink}>Müşteri Paneli</Link></li>
-              <li><Link href="/quote-list" className={styles.footerLink}>Teklif Listesi</Link></li>
+              <li><Link href="/teklif-listesi" className={styles.footerLink}>Teklif Listesi</Link></li>
             </ul>
           </div>
         </div>
