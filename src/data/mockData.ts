@@ -4,10 +4,10 @@ export interface Service {
   title: string;
   description: string;
   category: string;
-  popular?: boolean;
-  standards?: string;
-  turnaroundTime?: string;
-  sampleRequirement?: string;
+  popular?: boolean | null;
+  standards?: string | null;
+  turnaroundTime?: string | null;
+  sampleRequirement?: string | null;
 }
 
 export interface BlogPost {

@@ -114,7 +114,13 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <div className={styles.actionArea}>
                 <h3>Analiz Talebi Oluşturun</h3>
                 <p>Bu analiz için numune göndermek veya detaylı fiyat teklifi almak istiyorsanız sepetinize ekleyerek dijital talebinizi saniyeler içinde iletebilirsiniz.</p>
-                <ClientAddButton service={service} />
+                {/* Prisma'dan gelen null değerlerini Service tipine (undefined) dönüştürerek geçiyoruz */}
+                <ClientAddButton service={{
+                  ...service,
+                  standards: service.standards ?? undefined,
+                  turnaroundTime: service.turnaroundTime ?? undefined,
+                  sampleRequirement: service.sampleRequirement ?? undefined,
+                }} />
               </div>
 
               <footer className={styles.articleFooter}>
