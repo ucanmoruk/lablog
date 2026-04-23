@@ -70,7 +70,20 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     (window as any).openLabModal = openModal;
-    return () => { delete (window as any).openLabModal; };
+
+    const handleGlobalClick = (e: MouseEvent) => {
+      const tile = (e.target as HTMLElement).closest('[data-modal-svc]');
+      if (tile) {
+        const svc = tile.getAttribute('data-modal-svc');
+        if (svc) openModal(svc);
+      }
+    };
+
+    document.addEventListener('click', handleGlobalClick);
+    return () => { 
+      delete (window as any).openLabModal; 
+      document.removeEventListener('click', handleGlobalClick);
+    };
   }, []);
 
   return (
@@ -170,17 +183,7 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
 
       {children}
 
-      <script dangerouslySetInnerHTML={{ __html: `
-        document.addEventListener('click', function(e) {
-            const tile = e.target.closest('[data-modal-svc]');
-            if (tile) {
-                const svc = tile.getAttribute('data-modal-svc');
-                if (window.openLabModal) {
-                    window.openLabModal(svc);
-                }
-            }
-        });
-      `}} />
+
 
       {/* MODAL */}
       {modal.open && (
