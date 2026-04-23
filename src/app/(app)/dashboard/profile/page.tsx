@@ -18,17 +18,19 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileForm, setProfileForm] = useState(MOCK_USER);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const [myQuotes, setMyQuotes] = useState<any[]>([]);
-  const [loadingQuotes, setLoadingQuotes] = useState(true);
 
   useEffect(() => {
     const stored = localStorage.getItem('labUser');
     if (stored) {
       const data = JSON.parse(stored);
-      const updatedUser = { ...MOCK_USER, name: data.name, email: data.email };
+      const updatedUser = { 
+        ...MOCK_USER, 
+        name: data.name || MOCK_USER.name, 
+        email: data.email || MOCK_USER.email,
+        company: data.company || data.firmName || MOCK_USER.company
+      };
       setUser(updatedUser);
       setProfileForm(updatedUser);
-      fetchQuotes(data.email);
     }
   }, []);
 
@@ -47,24 +49,37 @@ export default function ProfilePage() {
   const handleSaveProfile = () => {
     setSaveStatus('saving');
     setTimeout(() => {
+      // Sync local state
       setUser(profileForm);
+      
+      // Update data in Storage
+      const stored = localStorage.getItem('labUser');
+      let newData = {};
+      if (stored) {
+        newData = JSON.parse(stored);
+      }
+      const updatedData = { 
+        ...newData, 
+        name: profileForm.name, 
+        company: profileForm.company, 
+        firmName: profileForm.company, // Support both keys
+        email: profileForm.email,
+        phone: profileForm.phone
+      };
+      
+      localStorage.setItem('labUser', JSON.stringify(updatedData));
+      
+      // Trigger event for layout to re-read
+      window.dispatchEvent(new Event('storage'));
+      
       setIsEditing(false);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
-    }, 1000);
+    }, 800);
   };
 
   return (
     <>
-      <header className={styles.topBar}>
-        <div className={styles.topBarLeft}>
-          <h1 className={styles.pageTitle}>Firma Bilgileri</h1>
-        </div>
-        <div className={styles.topBarRight}>
-          <button className={styles.iconBtn}><Bell size={20} /></button>
-        </div>
-      </header>
-
       <div className={styles.content}>
         <div className={styles.profileGrid}>
           <div className={styles.card}>
@@ -214,80 +229,6 @@ export default function ProfilePage() {
               Teknik Danışmanlık Al
             </a>
           </div>
-        </div>
-
-        {/* ─── My Quotes Section ─── */}
-        <div className={styles.card} style={{marginTop:"32px"}}>
-           <div className={styles.cardHeader}>
-             <div className={styles.headerInfo}>
-               <h2 className={styles.cardTitle}>Teklif Taleplerim</h2>
-               <p className={styles.cardDesc}>Gönderdiğiniz tüm analiz talepleri ve size iletilen resmi teklifler.</p>
-             </div>
-           </div>
-
-           <div className={styles.tableWrapper}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Teklif No</th>
-                    <th>Hizmet / Detay</th>
-                    <th>Durum</th>
-                    <th>Toplam</th>
-                    <th>Tarih</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {myQuotes.map((q) => {
-                    const qData = q.quoteData || {};
-                    const items = qData.items || [];
-                    const subtotal = items.reduce((acc: number, it: any) => acc + (it.unitPrice * it.quantity), 0);
-                    const discount = subtotal * ((qData.discountRate || 0) / 100);
-                    const vat = (subtotal - discount) * ((qData.vatRate || 20) / 100);
-                    const total = (subtotal - discount) + vat;
-
-                    return (
-                      <tr key={q.id}>
-                        <td>
-                          <span className={styles.tableId}>#{q.id.substring(0, 8).toUpperCase()}</span>
-                        </td>
-                        <td>
-                          <div className={styles.tableItems}>
-                            {items.length > 0 ? items[0].title : (q.message?.slice(0, 30) + '...')}
-                            {items.length > 1 && <span className={styles.moreTag}>+{items.length - 1} Daha</span>}
-                          </div>
-                        </td>
-                        <td>
-                          <div 
-                            className={styles.statusPill} 
-                            style={{
-                              background: q.status === 'sent' ? '#f0fdf4' : (q.status === 'accepted' ? '#eff6ff' : '#fffbeb'),
-                              color: q.status === 'sent' ? '#166534' : (q.status === 'accepted' ? '#1e40af' : '#b45309')
-                            }}
-                          >
-                             {q.status === 'sent' ? 'Teklif İletildi' : (q.status === 'accepted' ? 'Onaylandı' : 'Bekliyor')}
-                          </div>
-                        </td>
-                        <td>
-                          <span className={styles.tablePrice}>
-                            {q.status === 'sent' ? `${total.toLocaleString('tr-TR')} ₺` : '—'}
-                          </span>
-                        </td>
-                        <td className={styles.tableDate}>
-                          {new Date(q.createdAt).toLocaleDateString('tr-TR')}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {myQuotes.length === 0 && !loadingQuotes && (
-                    <tr>
-                      <td colSpan={5} style={{textAlign:"center", padding:"40px", color:"#86868b"}}>
-                        Henüz bir teklif talebiniz bulunmuyor.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-           </div>
         </div>
       </div>
     </>

@@ -1,15 +1,47 @@
 "use client";
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User, Phone, Building2, Mail, Lock, CheckCircle2 } from 'lucide-react';
+import { User, Phone, Building2, Mail, Lock } from 'lucide-react';
 import styles from '../auth.module.css';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    company: '',
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/dashboard');
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('labUser', JSON.stringify(data.user));
+        router.push('/dashboard');
+      } else {
+        setError(data.error || 'Kayıt sırasında bir hata oluştu.');
+      }
+    } catch (err) {
+      setError('Bağlantı hatası oluştu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -22,20 +54,36 @@ export default function RegisterPage() {
             <p className={styles.subtitle}>Sektörel analiz taleplerinizi yönetmek için hemen ücretsiz kayıt olun.</p>
           </div>
 
+            {error && <div className={styles.errorNotice} style={{color:"#c53030", fontSize:"13px", marginBottom:"15px"}}>{error}</div>}
+
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.formRow}>
                <div className={styles.inputWrapper}>
                  <label className={styles.label}>Adınız Soyadınız</label>
                  <div className={styles.inputWithIcon}>
                     <User size={18} className={styles.inputIcon} />
-                    <input type="text" className={styles.input} required placeholder="Ahmet Yılmaz" />
+                    <input 
+                      type="text" 
+                      className={styles.input} 
+                      required 
+                      placeholder="Ahmet Yılmaz" 
+                      value={formData.name}
+                      onChange={e => setFormData({...formData, name: e.target.value})}
+                    />
                  </div>
                </div>
                <div className={styles.inputWrapper}>
                  <label className={styles.label}>Telefon</label>
                  <div className={styles.inputWithIcon}>
                     <Phone size={18} className={styles.inputIcon} />
-                    <input type="tel" className={styles.input} required placeholder="0532 000 00 00" />
+                    <input 
+                      type="tel" 
+                      className={styles.input} 
+                      required 
+                      placeholder="0532 000 00 00" 
+                      value={formData.phone}
+                      onChange={e => setFormData({...formData, phone: e.target.value})}
+                    />
                  </div>
                </div>
             </div>
@@ -44,7 +92,14 @@ export default function RegisterPage() {
               <label className={styles.label}>Firma / Kurum Adı</label>
               <div className={styles.inputWithIcon}>
                  <Building2 size={18} className={styles.inputIcon} />
-                 <input type="text" className={styles.input} required placeholder="Şirket Adı A.Ş." />
+                 <input 
+                  type="text" 
+                  className={styles.input} 
+                  required 
+                  placeholder="Şirket Adı A.Ş." 
+                  value={formData.company}
+                  onChange={e => setFormData({...formData, company: e.target.value})}
+                 />
               </div>
             </div>
 
@@ -52,7 +107,14 @@ export default function RegisterPage() {
               <label className={styles.label}>E-posta Adresi</label>
               <div className={styles.inputWithIcon}>
                  <Mail size={18} className={styles.inputIcon} />
-                 <input type="email" className={styles.input} required placeholder="ornek@sirket.com" />
+                 <input 
+                  type="email" 
+                  className={styles.input} 
+                  required 
+                  placeholder="ornek@sirket.com" 
+                  value={formData.email}
+                  onChange={e => setFormData({...formData, email: e.target.value})}
+                 />
               </div>
             </div>
 
@@ -60,12 +122,19 @@ export default function RegisterPage() {
               <label className={styles.label}>Şifre</label>
               <div className={styles.inputWithIcon}>
                  <Lock size={18} className={styles.inputIcon} />
-                 <input type="password" className={styles.input} required placeholder="En az 8 karakter" />
+                 <input 
+                  type="password" 
+                  className={styles.input} 
+                  required 
+                  placeholder="En az 8 karakter" 
+                  value={formData.password}
+                  onChange={e => setFormData({...formData, password: e.target.value})}
+                 />
               </div>
             </div>
 
-            <button type="submit" className={styles.submitBtn}>
-              Kayıt Ol ve Devam Et
+            <button type="submit" className={styles.submitBtn} disabled={loading}>
+              {loading ? 'Kaydediliyor...' : 'Kayıt Ol ve Devam Et'}
             </button>
             <p className={styles.terms}>
               Kayıt olarak <Link href="/terms">Kullanıcı Sözleşmesi</Link>'ni ve KVKK aydınlatma metnini kabul etmiş olursunuz.

@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  FlaskConical, FileText, ShoppingBag, User, Building2,
-  LogOut, BarChart3, Globe
+  FlaskConical, ShoppingBag, User,
+  LogOut, BarChart3, Globe, Bell
 } from 'lucide-react';
 import styles from './dashboard.module.css';
 
@@ -21,11 +21,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
 
   useEffect(() => {
-    const stored = localStorage.getItem('labUser');
-    if (stored) {
-      const data = JSON.parse(stored);
-      setUser(prev => ({ ...prev, name: data.name, email: data.email }));
-    }
+    const loadUser = () => {
+        const stored = localStorage.getItem('labUser');
+        if (stored) {
+          const data = JSON.parse(stored);
+          setUser(prev => ({ 
+            ...prev, 
+            name: data.name || prev.name, 
+            email: data.email || prev.email, 
+            company: data.company || data.firmName || prev.company 
+          }));
+        }
+    };
+
+    loadUser();
+
+    // Listen for changes from other tabs or same tab manual triggers
+    window.addEventListener('storage', loadUser);
+    return () => window.removeEventListener('storage', loadUser);
   }, []);
 
   const handleLogout = () => {
@@ -46,9 +59,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <FlaskConical size={18} strokeWidth={2.5} />
             </div>
             <div>
-              <div className={styles.sidebarLogoText}>LabÇözüm</div>
+              <div className={styles.sidebarLogoText}>LabLog</div>
               <div className={styles.sidebarLogoSub}>Müşteri Paneli</div>
             </div>
+          </Link>
+
+          <Link href="/analizler" className={styles.newQuoteBtn} style={{marginTop:"15px", marginBottom:"5px", width:"100%", justifyContent:"center"}}>
+             <FlaskConical size={16} /> Yeni Talep Oluştur
           </Link>
 
           <div className={styles.userCard}>
@@ -75,13 +92,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className={styles.sidebarBottom}>
-          <Link href="/" className={styles.navBtn}><Globe size={18} /><span>Ana Siteye Git</span></Link>
           <button onClick={handleLogout} className={styles.navBtn}><LogOut size={18} /><span>Çıkış Yap</span></button>
         </div>
       </aside>
 
       {/* ── Main Content ── */}
       <main className={styles.main}>
+        <header className={styles.topBar}>
+          <div className={styles.topBarLeft}>
+            <h1 className={styles.pageTitle}>
+                {pathname.includes('/profile') ? 'Firma Bilgileri' : 
+                 pathname.includes('/offers') ? 'Tekliflerim' : 'Genel Bakış'}
+            </h1>
+          </div>
+          <div className={styles.topBarRight}>
+            <Link href="/" className={styles.tableActionBtn} style={{borderRadius:"99px", background:"#1d1d1f", color:"#fff", border:"none", padding:"8px 16px"}}>
+               <Globe size={14} /> Ana Siteye Git
+            </Link>
+            <button className={styles.iconBtn}><Bell size={20} /></button>
+          </div>
+        </header>
         {children}
       </main>
     </div>

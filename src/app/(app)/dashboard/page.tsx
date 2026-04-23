@@ -42,16 +42,6 @@ const STATS = [
 export default function DashboardPage() {
   return (
     <>
-      <header className={styles.topBar}>
-        <div className={styles.topBarLeft}>
-          <h1 className={styles.pageTitle}>Genel Bakış</h1>
-        </div>
-        <div className={styles.topBarRight}>
-          <button className={styles.iconBtn}><Bell size={20} /></button>
-          <Link href="/search" className={styles.newQuoteBtn}><Plus size={16} /> Yeni Talep</Link>
-        </div>
-      </header>
-
       <div className={styles.content}>
         <div className={styles.overviewGrid}>
           <div className={styles.statsRow}>
@@ -64,18 +54,11 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>Son Teklifler</h2>
-              <Link href="/dashboard/offers" className={styles.cardAction}>Tümünü Gör <ChevronRight size={16} /></Link>
-            </div>
-            <QuoteTable quotes={MOCK_QUOTES.slice(0, 3)} />
-          </div>
 
           <div className={styles.card}>
             <div className={styles.cardHeader}><h2 className={styles.cardTitle}>Hızlı İşlemler</h2></div>
             <div className={styles.quickGrid}>
-              <Link href="/search" className={styles.quickCard}><FlaskConical size={20} /><span>Yeni Analiz Talep Et</span><ArrowUpRight size={16} className={styles.quickArr} /></Link>
+              <Link href="/analizler" className={styles.quickCard}><FlaskConical size={20} /><span>Yeni Analiz Talep Et</span><ArrowUpRight size={16} className={styles.quickArr} /></Link>
               <Link href="/blog" className={styles.quickCard}><FileText size={20} /><span>Sektörel Rehberler</span><ArrowUpRight size={16} className={styles.quickArr} /></Link>
             </div>
           </div>

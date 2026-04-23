@@ -514,6 +514,20 @@ export default function AdminPanel() {
                             />
                         </div>
 
+                        {q.status === 'rejected' && q.quoteData?.rejectReason && (
+                          <div style={{
+                            marginTop: "20px",
+                            padding: "16px",
+                            background: "#fff5f5",
+                            border: "1px solid #feb2b2",
+                            borderRadius: "12px",
+                            color: "#c53030"
+                          }}>
+                            <div style={{fontWeight: 700, fontSize: "13px", marginBottom: "4px"}}>Müşteri Red Nedeni:</div>
+                            <div style={{fontSize: "14px"}}>{q.quoteData.rejectReason}</div>
+                          </div>
+                        )}
+
                         {(q.status !== 'sent' || isRevision) ? (
                           <button 
                             className={styles.sendResponseBtn}

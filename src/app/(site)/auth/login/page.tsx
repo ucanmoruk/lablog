@@ -1,14 +1,41 @@
 "use client";
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../auth.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/dashboard');
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('labUser', JSON.stringify(data.user));
+        router.push('/dashboard');
+      } else {
+        setError(data.error || 'Giriş yapılamadı.');
+      }
+    } catch (err) {
+      setError('Bağlantı hatası oluştu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -22,9 +49,18 @@ export default function LoginPage() {
           </div>
 
           <form className={styles.form} onSubmit={handleSubmit}>
+            {error && <div className={styles.errorNotice} style={{color:"#c53030", fontSize:"13px", marginBottom:"15px"}}>{error}</div>}
+
             <div className={styles.inputGroup}>
               <label className={styles.label}>E-posta Adresi</label>
-              <input type="email" className={styles.input} required placeholder="ornek@sirket.com" />
+              <input 
+                type="email" 
+                className={styles.input} 
+                required 
+                placeholder="ornek@sirket.com" 
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
             </div>
 
             <div className={styles.inputGroup}>
@@ -32,11 +68,18 @@ export default function LoginPage() {
                 <label className={styles.label}>Şifre</label>
                 <a href="#" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Şifremi Unuttum</a>
               </div>
-              <input type="password" className={styles.input} required placeholder="••••••••" />
+              <input 
+                type="password" 
+                className={styles.input} 
+                required 
+                placeholder="••••••••" 
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
             </div>
 
-            <button type="submit" className={styles.submitBtn}>
-              Giriş Yap
+            <button type="submit" className={styles.submitBtn} disabled={loading}>
+              {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
             </button>
           </form>
 
