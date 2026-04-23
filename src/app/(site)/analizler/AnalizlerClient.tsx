@@ -20,8 +20,10 @@ export default function AnalizlerClient({ initialServices }: Props) {
 
   const filteredServices = useMemo(() => {
     return initialServices.filter(s => {
-      const matchesSearch = s.title.toLowerCase().includes(search.toLowerCase()) || 
-                           s.description.toLowerCase().includes(search.toLowerCase());
+      const searchLower = search.toLowerCase();
+      const matchesSearch = s.title.toLowerCase().includes(searchLower) || 
+                           s.description.toLowerCase().includes(searchLower) ||
+                           (s.standards && s.standards.toLowerCase().includes(searchLower));
       const matchesCategory = activeCategory === 'Tümü' || s.category === activeCategory;
       return matchesSearch && matchesCategory;
     });

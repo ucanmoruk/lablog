@@ -54,7 +54,8 @@ export async function GET(request: Request) {
           OR: [
             { title: { contains: lowerQ, mode: 'insensitive' } },
             { description: { contains: lowerQ, mode: 'insensitive' } },
-            { category: { contains: lowerQ, mode: 'insensitive' } }
+            { category: { contains: lowerQ, mode: 'insensitive' } },
+            { standards: { contains: lowerQ, mode: 'insensitive' } }
           ]
         },
         take: 20
@@ -66,6 +67,7 @@ export async function GET(request: Request) {
     results = mockServices.filter(s => 
       s.title.toLowerCase().includes(lowerQ) || 
       s.description.toLowerCase().includes(lowerQ) ||
+      (s.standards && s.standards.toLowerCase().includes(lowerQ)) ||
       (matchedCategory && s.category.toLowerCase().includes(matchedCategory.toLowerCase()))
     ).slice(0, 20);
   }

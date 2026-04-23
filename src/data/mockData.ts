@@ -25,6 +25,7 @@ export interface BlogPost {
 export const services: Service[] = [
   {
     "id": "test-1-mob72t1i",
+    "slug": "mikrobiyolojik-patojen-taramasi",
     "title": "Mikrobiyolojik Patojen Taraması",
     "description": "İlaç ve Hammadde sektörüne yönelik: Toplam canlı sayımı ve spesifik patojenlerin (E. coli, S. aureus vb.) izolasyon ve identifikasyon işlemleri. Bu test, uluslararası kalite güvence programları ve yasal regülasyonlara uyum sağlamak amacıyla yüksek hassasiyetli analitik enstrümanlar ile gerçekleştirilir.",
     "category": "İlaç ve Hammadde",
@@ -35,6 +36,7 @@ export const services: Service[] = [
   },
   {
     "id": "test-2-mob72t1i",
+    "slug": "challenge-testi",
     "title": "Koruyucu Etkinlik (Challenge) Testi",
     "description": "Tekstil ve Deri sektörüne yönelik: Ürünün raf ömrü boyunca mikrobiyal kontaminasyona karşı korunma kapasitesinin değerlendirilmesi. Bu test, uluslararası kalite güvence programları ve yasal regülasyonlara uyum sağlamak amacıyla yüksek hassasiyetli analitik enstrümanlar ile gerçekleştirilir.",
     "category": "Tekstil ve Deri",
@@ -135,6 +137,7 @@ export const services: Service[] = [
   },
   {
     "id": "test-12-mob72t1i",
+    "slug": "rohs-analizi",
     "title": "RoHS Uygunluk Analizi",
     "description": "Belgelendirme sektörüne yönelik: Elektrikli cihazlarda kurşun, cıva, kadmiyum ve alev geciktiricilerin (PBB, PBDE) tayini. Bu test, uluslararası kalite güvence programları ve yasal regülasyonlara uyum sağlamak amacıyla yüksek hassasiyetli analitik enstrümanlar ile gerçekleştirilir.",
     "category": "Belgelendirme",
