@@ -2,7 +2,7 @@
 .container { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
 
 /* ─── HERO ─── */
-.hero { padding: 140px 48px 80px; background: #0a0a0f; }
+.hero { padding: 140px 48px 80px; background: #fbfbfd; border-bottom: 1px solid #f0f0f2; }
 .heroInner {
   max-width: 1200px; margin: 0 auto;
   display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
@@ -15,12 +15,12 @@
 }
 .heroTitle {
   font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; line-height: 1.2;
-  letter-spacing: -0.03em; color: #fff; margin-bottom: 20px;
+  letter-spacing: -0.03em; color: #1d1d1f; margin-bottom: 20px;
 }
-.heroExcerpt { font-size: 1.05rem; color: rgba(255,255,255,0.65); line-height: 1.7; margin-bottom: 28px; }
+.heroExcerpt { font-size: 1.05rem; color: #424245; line-height: 1.7; margin-bottom: 28px; }
 .heroMeta { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 32px; }
-.heroCat { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 4px; }
-.heroMetaItem { display: flex; align-items: center; gap: 6px; font-size: 13px; color: rgba(255,255,255,0.5); }
+.heroCat { background: #0066cc1a; color: #0066cc; font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 4px; }
+.heroMetaItem { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #86868b; }
 .heroBtn {
   display: inline-flex; align-items: center; gap: 10px;
   background: #0066cc; color: #fff; padding: 14px 28px; border-radius: 999px;
