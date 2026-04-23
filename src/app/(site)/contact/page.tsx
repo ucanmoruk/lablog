@@ -8,14 +8,33 @@ export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) return;
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      setForm({ name: "", email: "", phone: "", message: "" });
-    }, 4000);
+    
+    setLoading(true);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      
+      if (res.ok) {
+        setSuccess(true);
+        setForm({ name: "", email: "", phone: "", message: "" });
+        setTimeout(() => {
+          setSuccess(false);
+        }, 6000);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Bir hata oluştu, lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -139,8 +158,8 @@ export default function ContactPage() {
                     ></textarea>
                   </div>
 
-                  <button type="submit" className={styles.submitBtn}>
-                    Mesajı Gönder <ArrowRight size={16} />
+                  <button type="submit" className={styles.submitBtn} disabled={loading}>
+                    {loading ? "Gönderiliyor..." : "Mesajı Gönder"} <ArrowRight size={16} />
                   </button>
                   <p className={styles.privacyNote}>
                     Göndererek <Link href="/privacy">Gizlilik Politikamızı</Link> kabul etmiş olursunuz.

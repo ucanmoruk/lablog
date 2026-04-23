@@ -79,7 +79,7 @@ export default function AdminPanel() {
       excerpt: post.excerpt || '',
       content: post.content || '',
       tags: 'analiz, sektör, uzmanlık',
-      coverImage: (post as any).image || (post as any).coverImage || '',
+      coverImage: (post as any).coverImage || (post as any).image || '',
     });
     setTab('blog-new');
   };
@@ -399,7 +399,7 @@ export default function AdminPanel() {
                     <span className={styles.tableCat}>{post.category}</span>
                     <span className={styles.tableDate}>{post.date}</span>
                     <div className={styles.tableActions}>
-                      <button className={styles.editBtn} onClick={() => { setBlogForm({...post, coverImage: post.image || post.coverImage || ''} as any); setShowPreviewModal(true); }}><Eye size={14} /></button>
+                      <button className={styles.editBtn} onClick={() => { setBlogForm({...post, coverImage: (post as any).coverImage || (post as any).image || ''} as any); setShowPreviewModal(true); }}><Eye size={14} /></button>
                       <button className={styles.editBtn} onClick={() => handleEditBlog(post)}><PenSquare size={14} /></button>
                       <button className={styles.deleteBtn} onClick={() => setBlogList(blogList.filter(b => b.id !== post.id))}><Trash2 size={14} /></button>
                     </div>

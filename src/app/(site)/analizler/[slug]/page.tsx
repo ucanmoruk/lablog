@@ -1,11 +1,12 @@
-import { services } from '@/data/mockData';
+import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import styles from './service.module.css';
 import ClientAddButton from './ClientAddButton';
 import { Shield, Clock, Beaker, ArrowRight, ChevronLeft, User, Calendar, Award, Share2, Zap } from 'lucide-react';
 import Link from 'next/link';
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const services = await prisma.analysis.findMany({ select: { id: true } });
   return services.map((service) => ({
     slug: service.id,
   }));
@@ -13,7 +14,9 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const service = services.find(s => s.id === resolvedParams.slug);
+  const service = await prisma.analysis.findUnique({
+    where: { id: resolvedParams.slug }
+  });
   if (!service) return { title: 'Bulunamadı' };
   
   return {
@@ -24,13 +27,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const service = services.find(s => s.id === resolvedParams.slug);
+  const service = await prisma.analysis.findUnique({
+    where: { id: resolvedParams.slug }
+  });
 
   if (!service) {
     notFound();
   }
 
-  const popularServices = services.filter(s => s.popular && s.id !== service.id).slice(0, 5);
+  const popularServices = await prisma.analysis.findMany({
+    where: {
+      popular: true,
+      NOT: { id: service.id }
+    },
+    take: 5
+  });
 
   return (
     <main className={styles.main}>

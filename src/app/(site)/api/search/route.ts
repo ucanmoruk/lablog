@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
-import { services } from '@/data/mockData';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q') || '';
 
-  // Simulate AI processing delay
-  await new Promise((resolve) => setTimeout(resolve, 800));
+  if (!q) {
+     return NextResponse.json({ aiIntent: null, results: [] });
+  }
+
+  // Simulate processing delay
+  await new Promise((resolve) => setTimeout(resolve, 300));
 
   const lowerQ = q.toLowerCase();
   
@@ -19,7 +23,7 @@ export async function GET(request: Request) {
     'belgelendirme': ['avrupa', 'ihracat', 'ithalat', 'gümrük', 'izin', 'uygunluk', 'sertifika', 'rohs', 'reach']
   };
 
-  let matchedCategory = null;
+  let matchedCategory: string | null = null;
 
   for (const [category, keywords] of Object.entries(aiMap)) {
     if (keywords.some(kw => lowerQ.includes(kw))) {
@@ -31,26 +35,31 @@ export async function GET(request: Request) {
   let results = [];
 
   if (matchedCategory) {
-    // If AI found an intent, return all services in that category
-    results = services.filter(s => s.category.toLowerCase() === matchedCategory.toLowerCase());
+    // If AI found an intent, return services in that category
+    results = await prisma.analysis.findMany({
+      where: {
+        category: {
+          contains: matchedCategory
+        }
+      },
+      take: 20
+    });
   } else {
-    // Fallback to basic string matching
-    results = services.filter(s => 
-      s.title.toLowerCase().includes(lowerQ) || 
-      s.description.toLowerCase().includes(lowerQ) ||
-      s.category.toLowerCase().includes(lowerQ)
-    );
+    // Fallback to database string matching
+    results = await prisma.analysis.findMany({
+      where: {
+        OR: [
+          { title: { contains: lowerQ } },
+          { description: { contains: lowerQ } },
+          { category: { contains: lowerQ } }
+        ]
+      },
+      take: 20
+    });
   }
-
-  // Ensure exact matches are always at the top if there is an ai fallback
-  const exactMatches = services.filter(s => 
-    s.title.toLowerCase().includes(lowerQ) && !results.find(r => r.id === s.id)
-  );
-
-  const finalResults = [...exactMatches, ...results];
 
   return NextResponse.json({
     aiIntent: matchedCategory ? `Yapay Zeka sistemimiz aramanızı "${matchedCategory}" sektörü ile eşleştirdi.` : null,
-    results: finalResults
+    results: results
   });
 }

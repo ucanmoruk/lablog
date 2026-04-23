@@ -1,5 +1,4 @@
 "use client";
-import { blogs } from '@/data/mockData';
 import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowRight, Calendar, Clock, Search } from 'lucide-react';
@@ -12,11 +11,23 @@ const HERO_IMAGES = [
   'https://images.unsplash.com/photo-1582719471384-894fbb16e024?q=80&w=1200&auto=format&fit=crop',
 ];
 
-export default function BlogList() {
+interface BlogPost {
+  id: string;
+  title: string;
+  date: string;
+  author: string;
+  category: string;
+  excerpt: string;
+  content: string;
+}
+
+export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
   const [activeCat, setActiveCat] = useState('Tümü');
   const [search, setSearch] = useState('');
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+
+  if (!blogs || blogs.length === 0) return <div>Yazı bulunamadı.</div>;
 
   const featured = blogs[0];
   const rest = blogs.slice(1);

@@ -1,16 +1,20 @@
-import { blogs } from '@/data/mockData';
+import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import BlogPostContent from './BlogPostContent';
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const blogs = await prisma.blogPost.findMany({ select: { slug: true } });
   return blogs.map((blog) => ({
-    slug: blog.id,
+    slug: blog.slug,
   }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const blog = blogs.find(b => b.id === resolvedParams.slug);
+  const blog = await prisma.blogPost.findUnique({
+    where: { slug: resolvedParams.slug }
+  });
+  
   if (!blog) return { title: 'Bulunamadı' };
   
   return {
@@ -21,16 +25,31 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const blog = blogs.find(b => b.id === resolvedParams.slug);
+  const blog = await prisma.blogPost.findUnique({
+    where: { slug: resolvedParams.slug }
+  });
 
   if (!blog) {
     notFound();
   }
 
-  const related = blogs
-    .filter(b => b.id !== blog.id)
-    .sort((a, b) => (a.category === blog.category ? -1 : 1))
-    .slice(0, 3);
+  const related = await prisma.blogPost.findMany({
+    where: {
+      category: blog.category,
+      NOT: { id: blog.id }
+    },
+    take: 3
+  });
 
-  return <BlogPostContent blog={blog} related={related} />;
+  const blogData = {
+    ...blog,
+    date: blog.date.toISOString().split('T')[0]
+  };
+
+  const relatedData = related.map(b => ({
+    ...b,
+    date: b.date.toISOString().split('T')[0]
+  }));
+
+  return <BlogPostContent blog={blogData as any} related={relatedData as any} />;
 }
