@@ -8,6 +8,7 @@ export interface Service {
   standards?: string | null;
   turnaroundTime?: string | null;
   sampleRequirement?: string | null;
+  price?: string;
 }
 
 export interface BlogPost {

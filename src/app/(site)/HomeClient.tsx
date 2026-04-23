@@ -165,7 +165,7 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
                                 className={styles.dBtn} 
                                 onClick={(e) => { 
                                     e.stopPropagation(); 
-                                    addQuote({ id: r.id, title: r.title, category: r.category, price: 'İstek Üzerine' });
+                                    addQuote({ id: r.id, title: r.title, category: r.category, description: r.description, price: 'İstek Üzerine' });
                                     setDropOpen(false);
                                     setToast(true);
                                     setTimeout(() => setToast(false), 5000);

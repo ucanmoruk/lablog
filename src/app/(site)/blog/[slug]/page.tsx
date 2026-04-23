@@ -2,12 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import BlogPostContent from './BlogPostContent';
 
-export async function generateStaticParams() {
-  const blogs = await prisma.blogPost.findMany({ select: { slug: true } });
-  return blogs.map((blog) => ({
-    slug: blog.slug,
-  }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;

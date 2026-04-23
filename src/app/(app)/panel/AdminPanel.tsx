@@ -110,7 +110,7 @@ export default function AdminPanel() {
     }
   };
 
-  const handleEditBlog = (post: typeof blogs[0]) => {
+  const handleEditBlog = (post: any) => {
     setEditingBlogId(post.id);
     setBlogForm({
       title: post.title,
@@ -126,7 +126,7 @@ export default function AdminPanel() {
     setTab('blog-new');
   };
 
-  const handleEditAnalysis = (service: typeof services[0]) => {
+  const handleEditAnalysis = (service: any) => {
     setEditingAnalysisId(service.id);
     setAnalysisForm({
       title: service.title,

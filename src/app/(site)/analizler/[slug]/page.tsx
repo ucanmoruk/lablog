@@ -6,12 +6,6 @@ import ClientAddButton from './ClientAddButton';
 import { Shield, Clock, Beaker, ArrowRight, ChevronLeft, User, Calendar, Award, Share2, Zap } from 'lucide-react';
 import Link from 'next/link';
 
-export async function generateStaticParams() {
-  const services = await prisma.analysis.findMany({ select: { id: true } });
-  return services.map((service) => ({
-    slug: service.id,
-  }));
-}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
