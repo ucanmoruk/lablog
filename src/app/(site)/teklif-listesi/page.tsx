@@ -107,7 +107,7 @@ export default function QuoteListPage() {
                   <div className={styles.itemActions}>
                     <div className={styles.qtyBox}>
                       <button onClick={() => updateQuantity(item.id, -1)} className={styles.qtyBtn}><Minus size={14}/></button>
-                      <span className={styles.qtyVal}>{item.quantity} Adet</span>
+                      <span className={styles.qtyVal}>{item.quantity || 1} Adet</span>
                       <button onClick={() => updateQuantity(item.id, 1)} className={styles.qtyBtn}><Plus size={14}/></button>
                     </div>
                     

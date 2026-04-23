@@ -33,7 +33,13 @@ export const QuoteProvider = ({ children }: { children: React.ReactNode }) => {
     const saved = localStorage.getItem('lab_quotes');
     if (saved) {
       try {
-        setQuotes(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Eski verilerde quantity yoksa 1 ekle
+        const sanitized = parsed.map((item: any) => ({
+          ...item,
+          quantity: item.quantity || 1
+        }));
+        setQuotes(sanitized);
       } catch (e) {}
     }
   }, []);
