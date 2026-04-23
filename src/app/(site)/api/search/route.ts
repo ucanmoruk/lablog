@@ -39,7 +39,8 @@ export async function GET(request: Request) {
     results = await prisma.analysis.findMany({
       where: {
         category: {
-          contains: matchedCategory
+          contains: matchedCategory,
+          mode: 'insensitive'
         }
       },
       take: 20
@@ -49,9 +50,9 @@ export async function GET(request: Request) {
     results = await prisma.analysis.findMany({
       where: {
         OR: [
-          { title: { contains: lowerQ } },
-          { description: { contains: lowerQ } },
-          { category: { contains: lowerQ } }
+          { title: { contains: lowerQ, mode: 'insensitive' } },
+          { description: { contains: lowerQ, mode: 'insensitive' } },
+          { category: { contains: lowerQ, mode: 'insensitive' } }
         ]
       },
       take: 20

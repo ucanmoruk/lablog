@@ -68,6 +68,11 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
     return () => io.disconnect();
   }, []);
 
+  useEffect(() => {
+    (window as any).openLabModal = openModal;
+    return () => { delete (window as any).openLabModal; };
+  }, []);
+
   return (
     <>
       {/* Search logic integrated into hero */}
@@ -163,22 +168,15 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
         </div>
       </section>
 
-      {/* The rest of the page (passed as children) */}
       {children}
-      <div style={{height: 0, opacity: 0, pointerEvents: 'none'}}>
-        {/* Invisible triggers for Sector clicks since they need modal */}
-        <div id="trigger-modal" onClick={(e: any) => openModal(e.detail)}></div>
-      </div>
-      
-      {/* Global Sector/Feature Click Handler using IDs and script in server side */}
+
       <script dangerouslySetInnerHTML={{ __html: `
         document.addEventListener('click', function(e) {
             const tile = e.target.closest('[data-modal-svc]');
             if (tile) {
                 const svc = tile.getAttribute('data-modal-svc');
-                const trigger = document.getElementById('trigger-modal');
-                if (trigger) {
-                    trigger.dispatchEvent(new CustomEvent('click', { detail: svc }));
+                if (window.openLabModal) {
+                    window.openLabModal(svc);
                 }
             }
         });
