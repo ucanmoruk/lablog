@@ -114,7 +114,7 @@ export default function AboutPage() {
          <div className={styles.ctaInner}>
            <h2>Kalitenizi bizimle tescilleyin.</h2>
            <p>Ürünlerinizi küresel pazara hazırlamak için doğru adrestesiniz.</p>
-           <Link href="/contact" className={styles.ctaBtn}>İletişime Geçin</Link>
+           <Link href="/iletisim" className={styles.ctaBtn}>İletişime Geçin</Link>
          </div>
       </section>
 
