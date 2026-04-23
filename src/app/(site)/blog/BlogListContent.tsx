@@ -11,6 +11,12 @@ const HERO_IMAGES = [
   'https://images.unsplash.com/photo-1582719471384-894fbb16e024?q=80&w=1200&auto=format&fit=crop',
 ];
 
+const calculateReadingTime = (text: string) => {
+  const wordsPerMinute = 200;
+  const wordCount = text?.split(/\s+/).length || 0;
+  return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+};
+
 interface BlogPost {
   id: string;
   slug: string;
@@ -58,7 +64,7 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
             <div className={styles.heroMeta}>
               <span className={styles.heroCat}>{featured.category}</span>
               <span className={styles.heroMetaItem}><Calendar size={15} /> {featured.date}</span>
-              <span className={styles.heroMetaItem}><Clock size={15} /> 5 dk okuma</span>
+              <span className={styles.heroMetaItem}><Clock size={15} /> {calculateReadingTime(featured.content)} dk okuma</span>
             </div>
             <Link href={`/blog/${featured.slug}`} className={styles.heroBtn}>
               Yazıyı Oku <ArrowRight size={18} />
@@ -130,7 +136,7 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
                 <div className={styles.cardBody}>
                   <div className={styles.cardMeta}>
                     <span><Calendar size={13} /> {blog.date}</span>
-                    <span><Clock size={13} /> 5 dk</span>
+                    <span><Clock size={13} /> {calculateReadingTime(blog.content)} dk</span>
                   </div>
                   <h3 className={styles.cardTitle}>{blog.title}</h3>
                   <p className={styles.cardExc}>{blog.excerpt}</p>

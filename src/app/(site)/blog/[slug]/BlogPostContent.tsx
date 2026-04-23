@@ -3,6 +3,13 @@ import { ChevronLeft, Calendar, User, Clock, Award, Share2, Zap, ArrowRight } fr
 import Link from 'next/link';
 import styles from './blog.module.css';
 
+const calculateReadingTime = (text: string | null | undefined) => {
+  if (!text) return 1;
+  const wordsPerMinute = 200;
+  const wordCount = text.split(/\s+/).length;
+  return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+};
+
 export default function BlogPostContent({ blog, related }: { blog: any; related: any[] }) {
   return (
     <main className={styles.main}>
@@ -19,7 +26,7 @@ export default function BlogPostContent({ blog, related }: { blog: any; related:
           <div className={styles.meta}>
             <div className={styles.metaItem}><User size={18} /> <span>{blog.author}</span></div>
             <div className={styles.metaItem}><Calendar size={18} /> <span>{blog.date}</span></div>
-            <div className={styles.metaItem}><Clock size={18} /> <span>6 dk okuma</span></div>
+            <div className={styles.metaItem}><Clock size={18} /> <span>{calculateReadingTime(blog.content)} dk okuma</span></div>
           </div>
         </header>
 
