@@ -129,6 +129,7 @@
   padding: 6px 6px 6px 20px;
   box-shadow: 0 1px 24px rgba(0,0,0,0.07);
   transition: border-color 0.2s, box-shadow 0.2s;
+  position: relative;
 }
 .searchBar:focus-within {
   border-color: rgba(0,102,204,0.5);
@@ -231,6 +232,22 @@
 .dRight{ display:flex; align-items:center; gap:8px; }
 .dTag  { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(0,102,204,0.07); color: #0066cc; font-weight: 600; }
 .dArr  { font-size: 13px; color: #0066cc; font-weight: 600; letter-spacing: -0.01em; }
+
+.dBtn {
+  background: #0066cc;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.dBtn:hover {
+  background: #004fa3;
+}
 
 .dropFoot {
   display:flex; align-items:center; justify-content:space-between;

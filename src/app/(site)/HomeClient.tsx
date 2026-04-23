@@ -4,6 +4,7 @@ import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import MoleculeCanvas from "@/components/MoleculeCanvas";
+import { useQuote } from "@/context/QuoteContext";
 
 const CHIPS = ["💄 Kozmetik","⚡ RoHS / TAREKS","🧵 Tekstil","💊 Takviye Gıda","🧪 İlaç","☣️ REACH / SVHC","👜 Deri","📦 Ambalaj"];
 
@@ -15,23 +16,35 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
   const [dropOpen, setDropOpen] = useState(false);
   const [modal, setModal] = useState<{open:boolean; svc:string; success:boolean}>({ open:false, svc:"", success:false });
   const [form, setForm] = useState({ name:"", phone:"", company:"", email:"", note:"" });
+  const { addQuote } = useQuote();
   const searchRef = useRef<HTMLDivElement>(null);
 
   const doSearch = async (q = query) => {
-    if (!q.trim()) return;
+    if (!q.trim()) {
+        setResults([]);
+        setDropOpen(false);
+        return;
+    }
     setDropOpen(true);
     setLoading(true);
-    setResults([]);
     try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
         const data = await res.json();
-        setResults(data.results);
+        setResults(data.results || []);
     } catch (err) {
         console.error(err);
     } finally {
         setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (query.trim()) doSearch(query);
+      else { setResults([]); setDropOpen(false); }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
 
   const openModal = (svc: string) => {
     setModal({ open:true, svc, success:false });
@@ -123,51 +136,51 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
                 autoComplete="off"
               />
               <button className={styles.searchGo} onClick={() => doSearch()}>Ara</button>
-            </div>
 
-            <div className={styles.chips}>
-              {CHIPS.map(c => (
-                <button key={c} className={styles.chip}
-                  onClick={() => { const v = c.replace(/^.+?\s/,""); setQuery(v); doSearch(v); }}>
-                  {c}
-                </button>
-              ))}
-            </div>
-
-            {dropOpen && (
-              <div className={styles.drop}>
-                {loading ? (
-                  <div className={styles.dropLoading}><span className={styles.spin}/> Hizmetler aranıyor…</div>
-                ) : results.length === 0 ? (
-                  <div className={styles.dropEmpty}>
-                    Eşleşme bulunamadı. <button onClick={() => openModal("Özel Analiz Talebi")} className={styles.dropEmptyLink}>Uzmanımıza yazın →</button>
-                  </div>
-                ) : (
-                  <>
-                    <div className={styles.dropLabel}>Bulunan hizmetler</div>
-                    {results.map((r, i) => (
-                      <div key={i} className={styles.dRow} onClick={() => openModal(r.title)}>
-                        <div className={styles.dLeft}>
-                          <div className={styles.dIco}>🧪</div>
-                          <div>
-                            <div className={styles.dName}>{r.title}</div>
-                            <div className={styles.dSub}>{r.description.slice(0, 60)}… · {r.turnaroundTime}</div>
+              {dropOpen && (
+                <div className={styles.drop}>
+                  {loading ? (
+                    <div className={styles.dropLoading}><span className={styles.spin}/> Hizmetler aranıyor…</div>
+                  ) : results.length === 0 ? (
+                    <div className={styles.dropEmpty}>
+                      Eşleşme bulunamadı. <button onClick={() => openModal("Özel Analiz Talebi")} className={styles.dropEmptyLink}>Uzmanımıza yazın →</button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className={styles.dropLabel}>Bulunan hizmetler</div>
+                      {results.map((r, i) => (
+                        <div key={i} className={styles.dRow} onClick={() => router.push(`/analizler/${r.slug || r.id}`)}>
+                          <div className={styles.dLeft}>
+                            <div className={styles.dIco}>🧪</div>
+                            <div>
+                              <div className={styles.dName}>{r.title}</div>
+                              <div className={styles.dSub}>{r.description.slice(0, 60)}… · {r.turnaroundTime}</div>
+                            </div>
+                          </div>
+                          <div className={styles.dRight}>
+                            <span className={styles.dTag}>{r.category}</span>
+                            <button 
+                                className={styles.dBtn} 
+                                onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    addQuote({ id: r.id, title: r.title, category: r.category, price: 'İstek Üzerine' });
+                                    setDropOpen(false);
+                                }}
+                            >
+                                Sepete Ekle +
+                            </button>
                           </div>
                         </div>
-                        <div className={styles.dRight}>
-                          <span className={styles.dTag}>{r.category}</span>
-                          <span className={styles.dArr}>Teklif Al →</span>
-                        </div>
+                      ))}
+                      <div className={styles.dropFoot}>
+                        <span className={styles.dropFootTxt}>{results.length} hizmet bulundu</span>
+                        <button className={styles.dropFootBtn} onClick={() => router.push('/search')}>Tümünü Gör</button>
                       </div>
-                    ))}
-                    <div className={styles.dropFoot}>
-                      <span className={styles.dropFootTxt}>{results.length} hizmet bulundu</span>
-                      <button className={styles.dropFootBtn} onClick={() => openModal(results[0].title)}>Hızlı Teklif Al</button>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className={styles.heroStats}>
