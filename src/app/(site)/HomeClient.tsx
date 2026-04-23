@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import styles from "./page.module.css";
 import MoleculeCanvas from "@/components/MoleculeCanvas";
 import { useQuote } from "@/context/QuoteContext";
