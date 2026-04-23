@@ -86,13 +86,13 @@ export default function Navbar() {
                 </div>
                 <div className={styles.megaCol}>
                   <span className={styles.megaLabel}>Hızlı Bağlantı</span>
-                  <Link href="/arama" className={styles.megaItem}>Tüm Analizler</Link>
+                  <Link href="/analizler" className={styles.megaItem}>Tüm Analizler</Link>
                   <Link href="/blog" className={styles.megaItem}>Sektörel Yayınlar</Link>
                   <Link href="/teklif-listesi" className={styles.megaItem}>Teklif Listesi</Link>
                 </div>
               </div>
             </div>
-            <Link href="/arama" className={styles.link}>Analizler</Link>
+            <Link href="/analizler" className={styles.link}>Analizler</Link>
             <Link href="/blog" className={styles.link}>Blog</Link>
             <Link href="/hakkimizda" className={styles.link}>Hakkımızda</Link>
           </nav>
