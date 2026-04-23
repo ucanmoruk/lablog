@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import BlogListContent from './BlogListContent';
+import { blogs as mockBlogs } from '@/data/mockData';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,9 +10,19 @@ export const metadata = {
 };
 
 export default async function BlogListPage() {
-  const blogs = await prisma.blogPost.findMany({
-    orderBy: { date: 'desc' }
-  });
+  let blogs = [];
+  try {
+    blogs = await prisma.blogPost.findMany({
+      orderBy: { date: 'desc' }
+    });
+    
+    if (blogs.length === 0) {
+      return <BlogListContent blogs={mockBlogs as any} />;
+    }
+  } catch (error) {
+    console.warn("Blog DB fetch failed, using mock data:", error);
+    return <BlogListContent blogs={mockBlogs as any} />;
+  }
 
   const blogsData = blogs.map(b => ({
     ...b,

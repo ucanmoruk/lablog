@@ -2,6 +2,7 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import HomeClient from "./HomeClient";
+import { blogs as mockBlogs } from "@/data/mockData";
 
 const TRUST = ["ISO 17025 Akredite Laboratuvar","24 Saatte Teklif Garantisi","Uzman Kimyager Ekibi","Türkiye Geneli Numune Kabulü","Akredite Rapor & Belgelendirme"];
 
@@ -36,10 +37,21 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const latestBlogs = await prisma.blogPost.findMany({
-    orderBy: { date: 'desc' },
-    take: 3
-  });
+  let latestBlogs = [];
+  try {
+    latestBlogs = await prisma.blogPost.findMany({
+      orderBy: { date: 'desc' },
+      take: 3
+    });
+    
+    // Eğer DB boşsa mock'ları kullan
+    if (latestBlogs.length === 0) {
+      latestBlogs = mockBlogs.slice(0, 3) as any;
+    }
+  } catch (error) {
+    console.warn("Database connection failed, falling back to mock data:", error);
+    latestBlogs = mockBlogs.slice(0, 3) as any;
+  }
 
   return (
     <main className={styles.root}>

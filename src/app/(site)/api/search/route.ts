@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { services as mockServices } from '@/data/mockData';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -34,29 +35,39 @@ export async function GET(request: Request) {
 
   let results = [];
 
-  if (matchedCategory) {
-    // If AI found an intent, return services in that category
-    results = await prisma.analysis.findMany({
-      where: {
-        category: {
-          contains: matchedCategory,
-          mode: 'insensitive'
-        }
-      },
-      take: 20
-    });
-  } else {
-    // Fallback to database string matching
-    results = await prisma.analysis.findMany({
-      where: {
-        OR: [
-          { title: { contains: lowerQ, mode: 'insensitive' } },
-          { description: { contains: lowerQ, mode: 'insensitive' } },
-          { category: { contains: lowerQ, mode: 'insensitive' } }
-        ]
-      },
-      take: 20
-    });
+  try {
+    if (matchedCategory) {
+      // If AI found an intent, return services in that category
+      results = await prisma.analysis.findMany({
+        where: {
+          category: {
+            contains: matchedCategory,
+            mode: 'insensitive'
+          }
+        },
+        take: 20
+      });
+    } else {
+      // Fallback to database string matching
+      results = await prisma.analysis.findMany({
+        where: {
+          OR: [
+            { title: { contains: lowerQ, mode: 'insensitive' } },
+            { description: { contains: lowerQ, mode: 'insensitive' } },
+            { category: { contains: lowerQ, mode: 'insensitive' } }
+          ]
+        },
+        take: 20
+      });
+    }
+  } catch (error) {
+    console.warn("Search DB fetch failed, using mock data:", error);
+    // FALLBACK TO MOCK DATA
+    results = mockServices.filter(s => 
+      s.title.toLowerCase().includes(lowerQ) || 
+      s.description.toLowerCase().includes(lowerQ) ||
+      (matchedCategory && s.category.toLowerCase().includes(matchedCategory.toLowerCase()))
+    ).slice(0, 20);
   }
 
   return NextResponse.json({
