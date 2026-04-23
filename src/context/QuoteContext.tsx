@@ -2,22 +2,30 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Service } from '@/data/mockData';
 
+export interface QuoteItem extends Service {
+  quantity: number;
+}
+
 interface QuoteContextType {
-  quotes: Service[];
+  quotes: QuoteItem[];
   addQuote: (service: Service) => void;
   removeQuote: (id: string) => void;
+  updateQuantity: (id: string, delta: number) => void;
+  clearQuotes: () => void;
 }
 
 const QuoteContext = createContext<QuoteContextType>({
   quotes: [],
   addQuote: () => {},
   removeQuote: () => {},
+  updateQuantity: () => {},
+  clearQuotes: () => {},
 });
 
 export const useQuote = () => useContext(QuoteContext);
 
 export const QuoteProvider = ({ children }: { children: React.ReactNode }) => {
-  const [quotes, setQuotes] = useState<Service[]>([]);
+  const [quotes, setQuotes] = useState<QuoteItem[]>([]);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -38,7 +46,7 @@ export const QuoteProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addQuote = (service: Service) => {
     if (!quotes.find(q => q.id === service.id)) {
-      setQuotes([...quotes, service]);
+      setQuotes([...quotes, { ...service, quantity: 1 }]);
     }
   };
 
@@ -46,8 +54,22 @@ export const QuoteProvider = ({ children }: { children: React.ReactNode }) => {
     setQuotes(quotes.filter(q => q.id !== id));
   };
 
+  const updateQuantity = (id: string, delta: number) => {
+    setQuotes(quotes.map(q => {
+      if (q.id === id) {
+        const newQty = Math.max(1, q.quantity + delta);
+        return { ...q, quantity: newQty };
+      }
+      return q;
+    }));
+  };
+
+  const clearQuotes = () => {
+    setQuotes([]);
+  };
+
   return (
-    <QuoteContext.Provider value={{ quotes, addQuote, removeQuote }}>
+    <QuoteContext.Provider value={{ quotes, addQuote, removeQuote, updateQuantity, clearQuotes }}>
       {children}
     </QuoteContext.Provider>
   );
