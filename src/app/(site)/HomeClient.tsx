@@ -132,10 +132,10 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
                 placeholder="Kozmetik analizi, RoHS testi, tekstil, ilaç…"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                onKeyDown={e => e.key==="Enter" && doSearch()}
+                onKeyDown={e => e.key==="Enter" && router.push(`/search?q=${encodeURIComponent(query)}`)}
                 autoComplete="off"
               />
-              <button className={styles.searchGo} onClick={() => doSearch()}>Ara</button>
+              <button className={styles.searchGo} onClick={() => router.push(`/search?q=${encodeURIComponent(query)}`)}>Ara</button>
 
               {dropOpen && (
                 <div className={styles.drop}>
