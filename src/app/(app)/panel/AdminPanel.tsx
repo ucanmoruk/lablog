@@ -28,6 +28,8 @@ export default function AdminPanel() {
   const [selectedQuote, setSelectedQuote] = useState<string | null>(null);
   const [quoteAction, setQuoteAction] = useState<{ id: string; type: 'price' } | null>(null);
   const [offerPrice, setOfferPrice] = useState('');
+  const [adminResponse, setAdminResponse] = useState('');
+  const [sendingResponse, setSendingResponse] = useState(false);
 
   // Edit states
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
@@ -169,6 +171,32 @@ export default function AdminPanel() {
     setOfferPrice('');
   };
 
+  const handleSendResponse = async (id: string) => {
+    if (!adminResponse.trim()) return alert("Lütfen bir yanıt yazın.");
+    setSendingResponse(true);
+    try {
+      const res = await fetch('/api/admin/quotes/respond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, response: adminResponse })
+      });
+
+      if (res.ok) {
+        alert("Yanıt başarıyla gönderildi.");
+        setAdminResponse('');
+        // Listeyi güncelle
+        setQuoteList(quoteList.map(item => item.id === id ? { ...item, status: 'replied', response: adminResponse } : item));
+        setSelectedQuote(null);
+      } else {
+        alert("Hata oluştu.");
+      }
+    } catch (err) {
+      alert("Bağlantı hatası.");
+    } finally {
+      setSendingResponse(false);
+    }
+  };
+
   const liveServices = services.slice(0, 100);
   const liveBlogPosts = blogList;
   const pendingQuotes = MOCK_QUOTES.filter(q => q.price === '—');
@@ -307,16 +335,41 @@ export default function AdminPanel() {
               {quoteList.map(q => selectedQuote === q.id && (
                   <div key={`detail-${q.id}`} className={styles.quoteDetail}>
                     <div className={styles.quoteDetailGrid}>
-                      <div>
-                        <h3 className={styles.quoteDetailTitle}>Talep Detayı</h3>
+                      <div className={styles.quoteDetailLeft}>
+                        <h3 className={styles.quoteDetailTitle}>Talep İletisi</h3>
                         <div className={styles.quoteDetailMeta}>
                           <span><User size={14} /> {q.name}</span>
                           <span><MessageSquare size={14} /> {q.email}</span>
                           <span>{q.phone && <><Clock size={14} /> {q.phone}</>}</span>
                         </div>
-                        <div style={{marginTop:"20px", background:"#f9f9f9", padding:"15px", borderRadius:"8px", fontSize:"0.95rem", lineHeight:1.6}}>
+                        <div className={styles.messageBox}>
                             {q.message}
                         </div>
+                      </div>
+                      
+                      <div className={styles.quoteDetailRight}>
+                        <h3 className={styles.quoteDetailTitle}>{q.status === 'replied' ? 'Gönderilen Yanıt' : 'Yanıt Yaz'}</h3>
+                        <textarea 
+                           className={styles.adminResponseArea}
+                           placeholder="Müşteriye iletilecek teklif detayı veya teknik bilgi..."
+                           value={adminResponse}
+                           onChange={e => setAdminResponse(e.target.value)}
+                           disabled={q.status === 'replied'}
+                        />
+                        {q.status !== 'replied' && (
+                          <button 
+                            className={styles.sendResponseBtn}
+                            onClick={() => handleSendResponse(q.id)}
+                            disabled={sendingResponse}
+                          >
+                            {sendingResponse ? 'Gönderiliyor...' : 'Yanıtı Gönder & Mail At'}
+                          </button>
+                        )}
+                        {q.status === 'replied' && (
+                          <div className={styles.replyNotice}>
+                            <CheckCircle2 size={16} /> Bu talep yanıtlandı.
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

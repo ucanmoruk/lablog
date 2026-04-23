@@ -45,7 +45,10 @@ model ContactMessage {
   email     String
   phone     String?
   message   String
+  response  String?
+  status    String   @default("pending") // pending, replied, closed
   createdAt DateTime @default(now())
+  repliedAt DateTime?
 }
 
 model NewsletterSubscriber {
