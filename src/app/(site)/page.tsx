@@ -4,6 +4,15 @@ import { prisma } from "@/lib/prisma";
 import HomeClient from "./HomeClient";
 import { blogs as mockBlogs } from "@/data/mockData";
 
+// Define a common interface for blogs to avoid any
+interface BlogDisplay {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  excerpt: string;
+}
+
 const TRUST = ["ISO 17025 Akredite Laboratuvar", "24 Saatte Teklif Garantisi", "Uzman Kimyager Ekibi", "Türkiye Geneli Numune Kabulü", "Akredite Rapor & Belgelendirme"];
 
 const SECTORS = [
@@ -37,26 +46,47 @@ export const metadata = {
 };
 
 export default async function Home() {
-  let latestBlogs = [];
+  let latestBlogs: BlogDisplay[] = [];
+  
   try {
-    latestBlogs = await prisma.blogPost.findMany({
+    const dbBlogs = await prisma.blogPost.findMany({
       orderBy: { date: 'desc' },
       take: 3
     });
 
+    latestBlogs = dbBlogs.map(b => ({
+      id: b.id,
+      slug: b.slug,
+      title: b.title,
+      category: b.category,
+      excerpt: b.excerpt || ''
+    }));
+
     // Eğer DB boşsa mock'ları kullan
     if (latestBlogs.length === 0) {
-      latestBlogs = mockBlogs.slice(0, 3) as any;
+      latestBlogs = mockBlogs.slice(0, 3).map(b => ({
+        id: b.id,
+        slug: b.slug,
+        title: b.title,
+        category: b.category,
+        excerpt: b.excerpt || ''
+      }));
     }
   } catch (error) {
     console.warn("Database connection failed, falling back to mock data:", error);
-    latestBlogs = mockBlogs.slice(0, 3) as any;
+    latestBlogs = mockBlogs.slice(0, 3).map(b => ({
+      id: b.id,
+      slug: b.slug,
+      title: b.title,
+      category: b.category,
+      excerpt: b.excerpt || ''
+    }));
   }
 
   return (
     <main className={styles.root}>
       <HomeClient>
-        {/* ══ 2. TRUST BAR ═══════════════════════════════════ */}
+        {/* ══ TRUST BAR ══ */}
         <div className={`${styles.trust} ${styles.reveal}`}>
           {TRUST.map(t => (
             <div key={t} className={styles.tItem}>
@@ -66,7 +96,7 @@ export default async function Home() {
           ))}
         </div>
 
-        {/* ══ 3. SECTORS ════════════════════════════════════ */}
+        {/* ══ SECTORS ══ */}
         <section className={styles.sec} id="sektorler">
           <div className={`${styles.secTop} ${styles.reveal}`}>
             <div className={styles.secEyebrow}>Sektörler</div>
@@ -87,7 +117,7 @@ export default async function Home() {
 
         <div className={styles.divider} />
 
-        {/* ══ 4. FEATURE CARDS ══════════════════════════════ */}
+        {/* ══ FEATURE CARDS ══ */}
         <section className={styles.sec} id="hizmetler">
           <div className={`${styles.secTop} ${styles.reveal}`}>
             <div className={styles.secEyebrow}>Öne Çıkan Hizmetler</div>
@@ -108,7 +138,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* ══ 5. HOW IT WORKS ════════════════════════════════ */}
+        {/* ══ HOW IT WORKS ══ */}
         <div className={styles.howBg} id="nasil">
           <div className={styles.howInner}>
             <div className={`${styles.secTop} ${styles.reveal}`}>
@@ -127,7 +157,7 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* ══ 6. BLOG ════════════════════════════════════════ */}
+        {/* ══ BLOG ══ */}
         <section className={styles.sec} id="blog">
           <div className={`${styles.secTop} ${styles.reveal}`}>
             <div className={styles.secEyebrow}>Rehberler & Bilgi</div>
@@ -135,18 +165,18 @@ export default async function Home() {
             <p className={styles.secP}>Test süreçleri, mevzuat rehberleri, standart değişiklikleri. Karar vermeden önce okuyun.</p>
           </div>
           <div className={`${styles.blogGrid} ${styles.reveal}`}>
-            {latestBlogs.map((b, i) => (
+            {latestBlogs.map((b) => (
               <Link href={`/blog/${b.slug}`} key={b.id} className={styles.bCard}>
                 <div className={styles.bTag}>{b.category}</div>
                 <div className={styles.bTitle}>{b.title}</div>
-                <div className={styles.bExc}>{b.excerpt?.slice(0, 120)}…</div>
+                <div className={styles.bExc}>{b.excerpt.slice(0, 120)}…</div>
                 <div className={styles.bRead}>Devamını oku →</div>
               </Link>
             ))}
           </div>
         </section>
 
-        {/* ══ 7. CTA ═════════════════════════════════════════ */}
+        {/* ══ CTA ══ */}
         <div className={`${styles.ctaSection} ${styles.reveal}`}>
           <h2>Hemen başlayalım.</h2>
           <p>24 saatte fiyatlı teklif. Uzman kimyager ekibi. ISO 17025 akredite.</p>
