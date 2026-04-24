@@ -1,17 +1,16 @@
 "use client";
-import { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   PenSquare, FlaskConical, Plus, Save, Eye, Trash2,
   ChevronRight, BarChart3, FileText, Beaker,
-  LogOut, Globe, X, CheckCircle2, XCircle, MessageSquare, Clock, User, Calendar
+  LogOut, Globe, X, CheckCircle2, XCircle, MessageSquare, Clock, User, Calendar, Upload, Loader2, Settings
 } from 'lucide-react';
 import { services } from '@/data/mockData';
 import { blogs as mockBlogs } from '@/data/mockData';
-import { useEffect } from 'react';
 import styles from './panel.module.css';
 
-type Tab = 'dashboard' | 'blog-new' | 'blog-list' | 'analysis-new' | 'analysis-list' | 'quotes' | 'categories' | 'newsletter';
+type Tab = 'dashboard' | 'blog-new' | 'blog-list' | 'analysis-new' | 'analysis-list' | 'quotes' | 'categories' | 'newsletter' | 'settings';
 
 const CATEGORIES = ['Kozmetik', 'İlaç ve Hammadde', 'Tekstil ve Deri', 'Takviye Edici Gıda', 'Belgelendirme', 'Çevre ve Su', 'Ambalaj ve Plastik', 'Mikrobiyoloji'];
 const SECTORS = ['Kozmetik', 'İlaç ve Hammadde', 'Tekstil ve Deri', 'Gıda & Takviye Edici Gıda', 'Çevre ve Su', 'Ambalaj ve Plastik', 'Mikrobiyoloji', 'Belgelendirme'];
@@ -23,16 +22,64 @@ const MOCK_QUOTES = [
 ];
 
 export default function AdminPanel() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadTarget, setUploadTarget] = useState<'cover' | 'editor' | 'logo' | 'favicon'>('cover');
   const [tab, setTab] = useState<Tab>('dashboard');
   const [saved, setSaved] = useState(false);
+  const [siteSettings, setSiteSettings] = useState({
+    logo: '',
+    favicon: '',
+    title: 'Laboratuvar Çözüm Merkezi',
+    description: 'Profesyonel laboratuvar analiz ve danışmanlık hizmetleri.',
+    keywords: 'laboratuvar, analiz, test, kozmetik, ilaç',
+  });
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        if (uploadTarget === 'cover') {
+          setBlogForm({ ...blogForm, coverImage: data.url });
+        } else if (uploadTarget === 'logo') {
+          setSiteSettings({ ...siteSettings, logo: data.url });
+        } else if (uploadTarget === 'favicon') {
+          setSiteSettings({ ...siteSettings, favicon: data.url });
+        } else {
+          const imgHtml = `\n<img src="${data.url}" alt="${file.name}" style="width:100%; border-radius:12px; margin:24px 0;" />\n`;
+          setBlogForm({ ...blogForm, content: blogForm.content + imgHtml });
+        }
+      } else {
+        alert(data.error || 'Yükleme başarısız');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Yükleme sırasında bir hata oluştu.');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
   const [selectedQuote, setSelectedQuote] = useState<string | null>(null);
   const [quoteAction, setQuoteAction] = useState<{ id: string; type: 'price' } | null>(null);
   const [offerPrice, setOfferPrice] = useState('');
   const [adminResponse, setAdminResponse] = useState('');
   const [sendingResponse, setSendingResponse] = useState(false);
-  
+
   // Formal Quote States
-  const [quoteItems, setQuoteItems] = useState<{title: string, unitPrice: number, quantity: number}[]>([]);
+  const [quoteItems, setQuoteItems] = useState<{ title: string, unitPrice: number, quantity: number }[]>([]);
   const [vatRate, setVatRate] = useState(20);
   const [discountRate, setDiscountRate] = useState(0);
   const [additionalEmails, setAdditionalEmails] = useState('');
@@ -59,9 +106,9 @@ export default function AdminPanel() {
       if (Array.isArray(data)) setSubscriberList(data);
     };
     const fetchQuotes = async () => {
-        const res = await fetch('/api/admin/quotes');
-        const data = await res.json();
-        if (Array.isArray(data)) setQuoteList(data);
+      const res = await fetch('/api/admin/quotes');
+      const data = await res.json();
+      if (Array.isArray(data)) setQuoteList(data);
     };
     fetchBlogs();
     fetchSubscribers();
@@ -72,7 +119,7 @@ export default function AdminPanel() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const [blogForm, setBlogForm] = useState({
-    title: '', category: '', author: 'Uzman Analist Ekibi',
+    title: '', category: '', author: 'Oğuzhan EKER',
     date: new Date().toISOString().split('T')[0],
     excerpt: '', content: '', tags: '', coverImage: '',
     featured: false,
@@ -90,7 +137,7 @@ export default function AdminPanel() {
       if (tab === 'blog-new') {
         const method = editingBlogId ? 'PUT' : 'POST';
         const body = editingBlogId ? { id: editingBlogId, ...blogForm } : blogForm;
-        
+
         const res = await fetch('/api/admin/blog', {
           method,
           headers: { 'Content-Type': 'application/json' },
@@ -104,7 +151,6 @@ export default function AdminPanel() {
           alert('Hata oluştu.');
         }
       }
-      // Add similar for analysis if needed...
     } catch (err) {
       alert('Bağlantı hatası.');
     } finally {
@@ -125,7 +171,7 @@ export default function AdminPanel() {
     setBlogForm({
       title: post.title,
       category: post.category,
-      author: post.author || 'Uzman Analist Ekibi',
+      author: post.author || 'Oğuzhan EKER',
       date: post.date,
       excerpt: post.excerpt || '',
       content: post.content || '',
@@ -155,7 +201,7 @@ export default function AdminPanel() {
   const handleNewBlog = () => {
     setEditingBlogId(null);
     setBlogForm({
-      title: '', category: '', author: 'Uzman Analist Ekibi',
+      title: '', category: '', author: 'Oğuzhan EKER',
       date: new Date().toISOString().split('T')[0],
       excerpt: '', content: '', tags: '', coverImage: '',
       featured: false,
@@ -185,8 +231,8 @@ export default function AdminPanel() {
       const res = await fetch('/api/admin/quotes/respond', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          id, 
+        body: JSON.stringify({
+          id,
           response: adminResponse,
           quoteData: {
             items: quoteItems,
@@ -206,10 +252,9 @@ export default function AdminPanel() {
         setDiscountRate(0);
         setAdditionalEmails('');
         setIsRevision(false);
-        // Listeyi güncelle
-        setQuoteList(quoteList.map(item => item.id === id ? { 
-          ...item, 
-          status: 'sent', 
+        setQuoteList(quoteList.map(item => item.id === id ? {
+          ...item,
+          status: 'sent',
           response: adminResponse,
           quoteData: { items: quoteItems, vatRate, discountRate, notes: quoteNotes, additionalEmails }
         } : item));
@@ -249,11 +294,9 @@ export default function AdminPanel() {
 
   const liveServices = services.slice(0, 100);
   const liveBlogPosts = blogList;
-  const pendingQuotes = MOCK_QUOTES.filter(q => q.price === '—');
 
   return (
     <div className={styles.shell}>
-      {/* ── Top Header ── */}
       <header className={styles.topHeader}>
         <div className={styles.topHeaderLeft}>
           <div className={styles.topLogo}>
@@ -272,7 +315,6 @@ export default function AdminPanel() {
       </header>
 
       <div className={styles.layout}>
-        {/* ── Sidebar ── */}
         <aside className={styles.sidebar}>
           <nav className={styles.nav}>
             <div className={styles.navSection}>
@@ -310,13 +352,16 @@ export default function AdminPanel() {
                 <PenSquare size={18} /> Analizler <span className={styles.navCount}>{liveServices.length}</span>
               </button>
             </div>
+            <div className={styles.navSection}>
+              <div className={styles.navLabel}>AYARLAR</div>
+              <button onClick={() => setTab('settings')} className={`${styles.navBtn} ${tab === 'settings' ? styles.active : ''}`}>
+                <Settings size={18} /> Genel Ayarlar
+              </button>
+            </div>
           </nav>
         </aside>
 
-        {/* ── Main Content ── */}
         <main className={styles.content}>
-
-          {/* Dashboard */}
           {tab === 'dashboard' && (
             <div>
               <h1 className={styles.pageTitle}>Gösterge Paneli</h1>
@@ -346,7 +391,6 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {/* Quote Management */}
           {tab === 'quotes' && (
             <div>
               <div className={styles.pageHeader}>
@@ -365,18 +409,18 @@ export default function AdminPanel() {
                     setSelectedQuote(selectedQuote === q.id ? null : q.id);
                     setAdminResponse(q.response || '');
                     if (q.quoteData) {
-                        setQuoteItems(q.quoteData.items || []);
-                        setVatRate(q.quoteData.vatRate || 20);
-                        setDiscountRate(q.quoteData.discountRate || 0);
-                        setAdditionalEmails(q.quoteData.additionalEmails || '');
-                        setQuoteNotes(q.quoteData.notes || '');
-                        setIsRevision(false);
+                      setQuoteItems(q.quoteData.items || []);
+                      setVatRate(q.quoteData.vatRate || 20);
+                      setDiscountRate(q.quoteData.discountRate || 0);
+                      setAdditionalEmails(q.quoteData.additionalEmails || '');
+                      setQuoteNotes(q.quoteData.notes || '');
+                      setIsRevision(false);
                     } else {
-                        setQuoteItems([]);
-                        setQuoteNotes('');
-                        setDiscountRate(0);
-                        setAdditionalEmails('');
-                        setIsRevision(false);
+                      setQuoteItems([]);
+                      setQuoteNotes('');
+                      setDiscountRate(0);
+                      setAdditionalEmails('');
+                      setIsRevision(false);
                     }
                   }}>
                     <div>
@@ -384,7 +428,7 @@ export default function AdminPanel() {
                       <div className={styles.tableSub}>{q.email}</div>
                     </div>
                     <div>
-                      <div className={styles.tableTitle} style={{fontSize:"0.85rem", opacity:0.8}}>{q.message?.slice(0, 40)}...</div>
+                      <div className={styles.tableTitle} style={{ fontSize: "0.85rem", opacity: 0.8 }}>{q.message?.slice(0, 40)}...</div>
                     </div>
                     <div>
                       <div className={styles.statusBadge} data-status={q.status || 'pending'}>
@@ -393,167 +437,152 @@ export default function AdminPanel() {
                     </div>
                     <div className={styles.tableDate}>{new Date(q.createdAt).toLocaleDateString('tr-TR')}</div>
                     <div className={styles.tableActions} onClick={e => e.stopPropagation()}>
-                       <button className={styles.deleteBtn} onClick={async () => {
-                           if(confirm('Talebi silmek istediğinize emin misiniz?')) {
-                               await fetch(`/api/admin/quotes?id=${q.id}`, { method: 'DELETE' });
-                               setQuoteList(quoteList.filter(item => item.id !== q.id));
-                           }
-                       }}><Trash2 size={14} /></button>
+                      <button className={styles.deleteBtn} onClick={async () => {
+                        if (confirm('Talebi silmek istediğinize emin misiniz?')) {
+                          await fetch(`/api/admin/quotes?id=${q.id}`, { method: 'DELETE' });
+                          setQuoteList(quoteList.filter(item => item.id !== q.id));
+                        }
+                      }}><Trash2 size={14} /></button>
                     </div>
                   </div>
                 ))}
                 {quoteList.length === 0 && <div className={styles.empty}>Henüz teklif talebi bulunmuyor.</div>}
               </div>
-               {quoteList.map(q => selectedQuote === q.id && (
-                  <div key={`detail-${q.id}`} className={styles.quoteDetail}>
-                    <div className={styles.quoteDetailGrid}>
-                      <div className={styles.quoteDetailLeft}>
-                        <h3 className={styles.quoteDetailTitle}>Müşteri Talebi</h3>
-                        <div className={styles.quoteDetailMeta}>
-                          <span><User size={14} /> {q.name}</span>
-                          <span><MessageSquare size={14} /> {q.email}</span>
-                          <span>{q.phone && <><Clock size={14} /> {q.phone}</>}</span>
-                        </div>
-                        <div className={styles.messageBox}>
-                            {q.message}
-                        </div>
+              {quoteList.map(q => selectedQuote === q.id && (
+                <div key={`detail-${q.id}`} className={styles.quoteDetail}>
+                  <div className={styles.quoteDetailGrid}>
+                    <div className={styles.quoteDetailLeft}>
+                      <h3 className={styles.quoteDetailTitle}>Müşteri Talebi</h3>
+                      <div className={styles.quoteDetailMeta}>
+                        <span><User size={14} /> {q.name}</span>
+                        <span><MessageSquare size={14} /> {q.email}</span>
+                        <span>{q.phone && <><Clock size={14} /> {q.phone}</>}</span>
                       </div>
-                      
-                      <div className={styles.quoteDetailRight}>
-                        <h3 className={styles.quoteDetailTitle}>Teklif Hazırla</h3>
-                        
-                        <div className={styles.builderTable}>
-                           <div className={styles.builderHeader}>
-                              <span>Hizmet / Analiz</span>
-                              <span>BF (₺)</span>
-                              <span>Adet</span>
-                              <span></span>
-                           </div>
-                           {quoteItems.map((item, idx) => (
-                             <div key={idx} className={styles.builderRow}>
-                               <input 
-                                 className={styles.builderInput} 
-                                 placeholder="Analiz adı..."
-                                 value={item.title}
-                                 onChange={e => updateRow(idx, 'title', e.target.value)}
-                                 disabled={q.status === 'sent' && !isRevision}
-                               />
-                               <input 
-                                 className={styles.builderInput} 
-                                 type="number"
-                                 placeholder="0"
-                                 value={item.unitPrice}
-                                 onChange={e => updateRow(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
-                                 disabled={q.status === 'sent' && !isRevision}
-                               />
-                               <input 
-                                 className={styles.builderInput}
-                                 type="number" 
-                                 value={item.quantity}
-                                 onChange={e => updateRow(idx, 'quantity', parseInt(e.target.value) || 1)}
-                                 disabled={q.status === 'sent' && !isRevision}
-                               />
-                               {(q.status !== 'sent' || isRevision) && (
-                                 <button className={styles.rowDelete} onClick={() => removeRow(idx)}><X size={14}/></button>
-                               )}
-                             </div>
-                           ))}
-                           {(q.status !== 'sent' || isRevision) && (
-                             <button className={styles.addRowBtn} onClick={addQuoteItem}><Plus size={14}/> Yeni Satır Ekle</button>
-                           )}
-                        </div>
-
-                        <div className={styles.calculationBox}>
-                           <div className={styles.calcRow}><span>Ara Toplam:</span> <span>{subtotal.toLocaleString('tr-TR')} ₺</span></div>
-                           <div className={styles.calcRow}>
-                             <span>İskonto Uygula:</span> 
-                             <div style={{display:"flex", alignItems:"center", gap:"5px"}}>
-                                % <input 
-                                    className={styles.tinyInput} 
-                                    type="number" 
-                                    value={discountRate} 
-                                    onChange={e => setDiscountRate(parseFloat(e.target.value) || 0)}
-                                    disabled={q.status === 'sent' && !isRevision}
-                                  />
-                             </div>
-                           </div>
-                           {discountAmount > 0 && (
-                             <div className={styles.calcRow} style={{color:"#dc2626"}}><span>İndirim Tutarı:</span> <span>-{discountAmount.toLocaleString('tr-TR')} ₺</span></div>
-                           )}
-                           <div className={styles.calcRow}>
-                             <span>KDV Oranı:</span> 
-                             <select value={vatRate} onChange={e => setVatRate(parseInt(e.target.value))} disabled={q.status === 'sent' && !isRevision} className={styles.tinySelect}>
-                               <option value={0}>%0</option>
-                               <option value={10}>%10</option>
-                               <option value={20}>%20</option>
-                             </select>
-                           </div>
-                           <div className={styles.calcTotal}><span>Genel Toplam:</span> <span>{grandTotal.toLocaleString('tr-TR')} ₺</span></div>
-                        </div>
-
-                        <div style={{marginTop:"20px"}}>
-                            <label className={styles.label}>Ek Alıcı E-postaları (Virgülle ayırın)</label>
-                            <input 
-                               className={styles.builderInput}
-                               placeholder="muhasebe@firma.com, yonetim@firma.com"
-                               value={additionalEmails}
-                               onChange={e => setAdditionalEmails(e.target.value)}
-                               disabled={q.status === 'sent' && !isRevision}
-                            />
-                        </div>
-
-                        <div style={{marginTop:"20px"}}>
-                            <label className={styles.label}>Teklif Notları (Müşteriye iletilir)</label>
-                            <textarea 
-                               className={styles.adminResponseArea}
-                               style={{minHeight:"100px"}}
-                               placeholder="Örn: Analizler 3 iş günü içinde tamamlanacaktır..."
-                               value={quoteNotes}
-                               onChange={e => setQuoteNotes(e.target.value)}
-                               disabled={q.status === 'sent' && !isRevision}
-                            />
-                        </div>
-
-                        {q.status === 'rejected' && q.quoteData?.rejectReason && (
-                          <div style={{
-                            marginTop: "20px",
-                            padding: "16px",
-                            background: "#fff5f5",
-                            border: "1px solid #feb2b2",
-                            borderRadius: "12px",
-                            color: "#c53030"
-                          }}>
-                            <div style={{fontWeight: 700, fontSize: "13px", marginBottom: "4px"}}>Müşteri Red Nedeni:</div>
-                            <div style={{fontSize: "14px"}}>{q.quoteData.rejectReason}</div>
-                          </div>
-                        )}
-
-                        {(q.status !== 'sent' || isRevision) ? (
-                          <button 
-                            className={styles.sendResponseBtn}
-                            onClick={() => handleSendResponse(q.id)}
-                            disabled={sendingResponse || quoteItems.length === 0}
-                          >
-                            {sendingResponse ? 'Gönderiliyor...' : (isRevision ? 'Teklifi Güncelle & Yeniden Gönder' : 'Resmi Teklif Oluştur & Mail At')}
-                          </button>
-                        ) : (
-                          <div style={{display:"flex", gap:"10px", marginTop:"20px"}}>
-                            <div className={styles.replyNotice} style={{flex:1, marginTop:0}}>
-                              <CheckCircle2 size={16} /> Teklif iletildi.
-                            </div>
-                            <button className={styles.previewBtn} onClick={startRevision}>
-                                <PenSquare size={14}/> Revize Et
-                            </button>
-                          </div>
-                        )}
+                      <div className={styles.messageBox}>
+                        {q.message}
                       </div>
                     </div>
+
+                    <div className={styles.quoteDetailRight}>
+                      <h3 className={styles.quoteDetailTitle}>Teklif Hazırla</h3>
+
+                      <div className={styles.builderTable}>
+                        <div className={styles.builderHeader}>
+                          <span>Hizmet / Analiz</span>
+                          <span>BF (₺)</span>
+                          <span>Adet</span>
+                          <span></span>
+                        </div>
+                        {quoteItems.map((item, idx) => (
+                          <div key={idx} className={styles.builderRow}>
+                            <input
+                              className={styles.builderInput}
+                              placeholder="Analiz adı..."
+                              value={item.title}
+                              onChange={e => updateRow(idx, 'title', e.target.value)}
+                              disabled={q.status === 'sent' && !isRevision}
+                            />
+                            <input
+                              className={styles.builderInput}
+                              type="number"
+                              placeholder="0"
+                              value={item.unitPrice}
+                              onChange={e => updateRow(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
+                              disabled={q.status === 'sent' && !isRevision}
+                            />
+                            <input
+                              className={styles.builderInput}
+                              type="number"
+                              value={item.quantity}
+                              onChange={e => updateRow(idx, 'quantity', parseInt(e.target.value) || 1)}
+                              disabled={q.status === 'sent' && !isRevision}
+                            />
+                            {(q.status !== 'sent' || isRevision) && (
+                              <button className={styles.rowDelete} onClick={() => removeRow(idx)}><X size={14} /></button>
+                            )}
+                          </div>
+                        ))}
+                        {(q.status !== 'sent' || isRevision) && (
+                          <button className={styles.addRowBtn} onClick={addQuoteItem}><Plus size={14} /> Yeni Satır Ekle</button>
+                        )}
+                      </div>
+
+                      <div className={styles.calculationBox}>
+                        <div className={styles.calcRow}><span>Ara Toplam:</span> <span>{subtotal.toLocaleString('tr-TR')} ₺</span></div>
+                        <div className={styles.calcRow}>
+                          <span>İskonto Uygula:</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                            % <input
+                              className={styles.tinyInput}
+                              type="number"
+                              value={discountRate}
+                              onChange={e => setDiscountRate(parseFloat(e.target.value) || 0)}
+                              disabled={q.status === 'sent' && !isRevision}
+                            />
+                          </div>
+                        </div>
+                        {discountAmount > 0 && (
+                          <div className={styles.calcRow} style={{ color: "#dc2626" }}><span>İndirim Tutarı:</span> <span>-{discountAmount.toLocaleString('tr-TR')} ₺</span></div>
+                        )}
+                        <div className={styles.calcRow}>
+                          <span>KDV Oranı:</span>
+                          <select value={vatRate} onChange={e => setVatRate(parseInt(e.target.value))} disabled={q.status === 'sent' && !isRevision} className={styles.tinySelect}>
+                            <option value={0}>%0</option>
+                            <option value={10}>%10</option>
+                            <option value={20}>%20</option>
+                          </select>
+                        </div>
+                        <div className={styles.calcTotal}><span>Genel Toplam:</span> <span>{grandTotal.toLocaleString('tr-TR')} ₺</span></div>
+                      </div>
+
+                      <div style={{ marginTop: "20px" }}>
+                        <label className={styles.label}>Ek Alıcı E-postaları (Virgülle ayırın)</label>
+                        <input
+                          className={styles.builderInput}
+                          placeholder="muhasebe@firma.com, yonetim@firma.com"
+                          value={additionalEmails}
+                          onChange={e => setAdditionalEmails(e.target.value)}
+                          disabled={q.status === 'sent' && !isRevision}
+                        />
+                      </div>
+
+                      <div style={{ marginTop: "20px" }}>
+                        <label className={styles.label}>Teklif Notları (Müşteriye iletilir)</label>
+                        <textarea
+                          className={styles.adminResponseArea}
+                          style={{ minHeight: "100px" }}
+                          placeholder="Örn: Analizler 3 iş günü içinde tamamlanacaktır..."
+                          value={quoteNotes}
+                          onChange={e => setQuoteNotes(e.target.value)}
+                          disabled={q.status === 'sent' && !isRevision}
+                        />
+                      </div>
+
+                      {(q.status !== 'sent' || isRevision) ? (
+                        <button
+                          className={styles.sendResponseBtn}
+                          onClick={() => handleSendResponse(q.id)}
+                          disabled={sendingResponse || quoteItems.length === 0}
+                        >
+                          {sendingResponse ? 'Gönderiliyor...' : (isRevision ? 'Teklifi Güncelle & Yeniden Gönder' : 'Resmi Teklif Oluştur & Mail At')}
+                        </button>
+                      ) : (
+                        <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+                          <div className={styles.replyNotice} style={{ flex: 1, marginTop: 0 }}>
+                            <CheckCircle2 size={16} /> Teklif iletildi.
+                          </div>
+                          <button className={styles.previewBtn} onClick={startRevision}>
+                            <PenSquare size={14} /> Revize Et
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ))}
+                </div>
+              ))}
             </div>
           )}
 
-          {/* New/Edit Blog Form */}
           {tab === 'blog-new' && (
             <div>
               <div className={styles.pageHeader}>
@@ -572,14 +601,22 @@ export default function AdminPanel() {
                   <div className={styles.formGroup}><label className={styles.label}>Özet *</label><textarea className={styles.textarea} rows={3} placeholder="Yazının kısa özeti..." value={blogForm.excerpt} onChange={e => setBlogForm({ ...blogForm, excerpt: e.target.value })} /></div>
                   <div className={styles.formGroup}>
                     <label className={styles.label}>İçerik (HTML Destekli) *</label>
-                    <div className={styles.editorToolbar} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '8px', padding: '8px', background: '#f5f5f7', borderRadius: '8px' }}>
-                      <button type="button" style={{ background: '#fff', border: '1px solid #ddd', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }} onClick={() => setBlogForm({...blogForm, content: blogForm.content + '\n<p>Yeni paragraf metni...</p>\n'})}>📝 Paragraf</button>
-                      <button type="button" style={{ background: '#fff', border: '1px solid #ddd', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }} onClick={() => setBlogForm({...blogForm, content: blogForm.content + '\n<h2>Başlık Ekle</h2>\n'})}>T Başlık</button>
-                      <button type="button" style={{ background: '#fff', border: '1px solid #ddd', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }} onClick={() => setBlogForm({...blogForm, content: blogForm.content + '\n<img src="https://..." alt="Görsel" style="width:100%; border-radius:12px; margin:24px 0;" />\n'})}>🖼️ Görsel</button>
-                      <button type="button" style={{ background: '#fff', border: '1px solid #ddd', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }} onClick={() => setBlogForm({...blogForm, content: blogForm.content + '\n<div style="background: #f0f7ff; border-left: 4px solid #0066cc; padding: 20px; border-radius: 8px; margin: 24px 0;"><strong>💡 İpucu:</strong> Buraya dikkat çekici bir metin yazın...</div>\n'})}>💡 Call Out Ekle</button>
-                      <button type="button" style={{ background: '#fff', border: '1px solid #ddd', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }} onClick={() => setBlogForm({...blogForm, content: blogForm.content + '\n<blockquote style="font-style: italic; border-left: 4px solid #ddd; padding-left: 20px; margin: 24px 0; color: #555; font-size: 1.1rem;">"Buraya önemli bir alıntı veya söz yazın..."</blockquote>\n'})}>❝ Alıntı Ekle</button>
+                    <div className={styles.editorToolbar}>
+                      <button type="button" className={styles.toolbarBtn} onClick={() => setBlogForm({ ...blogForm, content: blogForm.content + '\n<p>Yeni paragraf metni...</p>\n' })}>📝 Paragraf</button>
+                      <button type="button" className={styles.toolbarBtn} onClick={() => setBlogForm({ ...blogForm, content: blogForm.content + '\n<h2>Başlık Ekle</h2>\n' })}>T Başlık</button>
+                      <button type="button" className={styles.toolbarBtn} onClick={() => { setUploadTarget('editor'); fileInputRef.current?.click(); }}>
+                        {uploading && uploadTarget === 'editor' ? <Loader2 size={14} className={styles.spin} /> : '🖼️ Görsel Yükle'}
+                      </button>
+                      <button type="button" className={styles.toolbarBtn} onClick={() => setBlogForm({ ...blogForm, content: blogForm.content + '\n<div style="background: #f0f7ff; border-left: 4px solid #0066cc; padding: 20px; border-radius: 8px; margin: 24px 0;"><strong>💡 İpucu:</strong> Buraya dikkat çekici bir metin yazın...</div>\n' })}>💡 Call Out</button>
+                      <button type="button" className={styles.toolbarBtn} onClick={() => setBlogForm({ ...blogForm, content: blogForm.content + '\n<blockquote style="font-style: italic; border-left: 4px solid #ddd; padding-left: 20px; margin: 24px 0; color: #555; font-size: 1.1rem;">"Buraya önemli bir alıntı veya söz yazın..."</blockquote>\n' })}>❝ Alıntı</button>
                     </div>
-                    <textarea className={styles.editor} rows={20} placeholder={`<p>İçeriğinizi buraya yazın...</p>`} value={blogForm.content} onChange={e => setBlogForm({ ...blogForm, content: e.target.value })} />
+                    <textarea
+                      className={styles.editor}
+                      rows={25}
+                      placeholder="Blog yazısı içeriğini buraya girin... HTML etiketleri kullanabilirsiniz."
+                      value={blogForm.content}
+                      onChange={e => setBlogForm({ ...blogForm, content: e.target.value })}
+                    />
                   </div>
                   <div className={styles.formGroup}><label className={styles.label}>Etiketler</label><input className={styles.input} placeholder="analiz, kozmetik (virgülle ayırın)" value={blogForm.tags} onChange={e => setBlogForm({ ...blogForm, tags: e.target.value })} /></div>
                 </div>
@@ -592,9 +629,17 @@ export default function AdminPanel() {
                     <div className={styles.formGroup} style={{ marginTop: '10px' }}><label className={styles.checkLabel}><input type="checkbox" checked={blogForm.featured} onChange={e => setBlogForm({ ...blogForm, featured: e.target.checked })} /> <strong>Öne Çıkan Yazı</strong></label></div>
                   </div>
                   <div className={styles.sideCard}>
-                    <h3 className={styles.sideTitle}>Medya</h3>
-                    <div className={styles.formGroup}><label className={styles.label}>Kapak Görseli URL</label><input className={styles.input} placeholder="https://..." value={blogForm.coverImage} onChange={e => setBlogForm({ ...blogForm, coverImage: e.target.value })} /></div>
-                    {blogForm.coverImage && <div style={{ marginTop: '12px', borderRadius: '8px', overflow: 'hidden', height: '120px', background: '#eee' }}><img src={blogForm.coverImage} alt="Kapak Önizleme" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => (e.currentTarget.style.display = 'none')} /></div>}
+                    <h3 className={styles.sideTitle}>Kapak Görseli</h3>
+                    <div className={styles.uploadArea} onClick={() => { setUploadTarget('cover'); fileInputRef.current?.click(); }}>
+                      {uploading && uploadTarget === 'cover' ? (
+                        <div className={styles.uploadPlaceholder}><Loader2 size={24} className={styles.spin} /> <span>Yükleniyor...</span></div>
+                      ) : blogForm.coverImage ? (
+                        <img src={blogForm.coverImage} alt="Kapak" className={styles.uploadPreview} />
+                      ) : (
+                        <div className={styles.uploadPlaceholder}><Upload size={24} /> <span>Görsel Yükle</span></div>
+                      )}
+                    </div>
+                    <input className={styles.input} style={{ marginTop: '8px' }} placeholder="Veya görsel URL girin..." value={blogForm.coverImage} onChange={e => setBlogForm({ ...blogForm, coverImage: e.target.value })} />
                   </div>
                   <div className={styles.sideCard}>
                     <h3 className={styles.sideTitle}>SEO — URL Önizleme</h3>
@@ -605,7 +650,6 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {/* New/Edit Analysis Form */}
           {tab === 'analysis-new' && (
             <div>
               <div className={styles.pageHeader}>
@@ -632,20 +676,11 @@ export default function AdminPanel() {
                     <div className={styles.formGroup}><label className={styles.checkLabel}><input type="checkbox" checked={analysisForm.popular} onChange={e => setAnalysisForm({ ...analysisForm, popular: e.target.checked })} /> Popüler Analiz olarak işaretle</label></div>
                     <div className={styles.formGroup}><label className={styles.label}>Fiyat Bilgisi</label><input className={styles.input} placeholder="İstek Üzerine / ₺ 850" value={analysisForm.price} onChange={e => setAnalysisForm({ ...analysisForm, price: e.target.value })} /></div>
                   </div>
-                  <div className={styles.sideCard}>
-                    <h3 className={styles.sideTitle}>Önizleme</h3>
-                    <div className={styles.previewCard}>
-                      <div className={styles.previewTitle}>{analysisForm.title || 'Analiz Adı'}</div>
-                      <div className={styles.previewMeta}>{analysisForm.standard && <span>{analysisForm.standard}</span>}{analysisForm.turnaroundTime && <span>{analysisForm.turnaroundTime}</span>}</div>
-                      <p className={styles.previewDesc}>{analysisForm.description || 'Açıklama buraya gelecek...'}</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Blog List — Live Data */}
           {tab === 'blog-list' && (
             <div>
               <div className={styles.pageHeader}>
@@ -658,9 +693,9 @@ export default function AdminPanel() {
                   <div key={post.id} className={styles.tableRow}>
                     <span className={styles.tableTitle}>{post.title}</span>
                     <span className={styles.tableCat}>{post.category}</span>
-                    <span className={styles.tableDate}>{post.date}</span>
+                    <span className={styles.tableDate}>{new Date(post.date).toLocaleDateString('tr-TR')}</span>
                     <div className={styles.tableActions}>
-                      <button className={styles.editBtn} onClick={() => { setBlogForm({...post, coverImage: (post as any).coverImage || (post as any).image || ''} as any); setShowPreviewModal(true); }}><Eye size={14} /></button>
+                      <button className={styles.editBtn} onClick={() => { setBlogForm({ ...post, coverImage: (post as any).coverImage || (post as any).image || '' } as any); setShowPreviewModal(true); }}><Eye size={14} /></button>
                       <button className={styles.editBtn} onClick={() => handleEditBlog(post)}><PenSquare size={14} /></button>
                       <button className={styles.deleteBtn} onClick={() => handleDeleteBlog(post.id)}><Trash2 size={14} /></button>
                     </div>
@@ -670,7 +705,6 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {/* Analysis List — Live Data */}
           {tab === 'analysis-list' && (
             <div>
               <div className={styles.pageHeader}>
@@ -694,7 +728,6 @@ export default function AdminPanel() {
               </div>
             </div>
           )}
-          {/* Category Management */}
           {tab === 'categories' && (
             <div>
               <div className={styles.pageHeader}>
@@ -702,7 +735,7 @@ export default function AdminPanel() {
               </div>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', maxWidth: '400px' }}>
                 <input className={styles.input} value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="Yeni kategori adı..." />
-                <button className={styles.saveBtn} onClick={() => { if(newCategoryName.trim() && !categoryList.includes(newCategoryName)) { setCategoryList([...categoryList, newCategoryName.trim()]); setNewCategoryName(''); } }}>Ekle</button>
+                <button className={styles.saveBtn} onClick={() => { if (newCategoryName.trim() && !categoryList.includes(newCategoryName)) { setCategoryList([...categoryList, newCategoryName.trim()]); setNewCategoryName(''); } }}>Ekle</button>
               </div>
               <div className={styles.listTable} style={{ maxWidth: '600px' }}>
                 <div className={styles.tableHead}><span>Kategori Adı</span><span>İşlem</span></div>
@@ -718,7 +751,6 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {/* Newsletter Subscribers */}
           {tab === 'newsletter' && (
             <div>
               <div className={styles.pageHeader}>
@@ -732,10 +764,10 @@ export default function AdminPanel() {
                     <span className={styles.tableDate}>{new Date(s.createdAt).toLocaleDateString('tr-TR')}</span>
                     <div className={styles.tableActions}>
                       <button className={styles.deleteBtn} onClick={async () => {
-                         if(confirm('Aboneyi silmek istediğinize emin misiniz?')) {
-                           await fetch(`/api/admin/newsletter?id=${s.id}`, { method: 'DELETE' });
-                           setSubscriberList(subscriberList.filter(sub => sub.id !== s.id));
-                         }
+                        if (confirm('Aboneyi silmek istediğinize emin misiniz?')) {
+                          await fetch(`/api/admin/newsletter?id=${s.id}`, { method: 'DELETE' });
+                          setSubscriberList(subscriberList.filter(sub => sub.id !== s.id));
+                        }
                       }}><Trash2 size={14} /></button>
                     </div>
                   </div>
@@ -745,42 +777,110 @@ export default function AdminPanel() {
             </div>
           )}
 
+          {tab === 'settings' && (
+            <div>
+              <div className={styles.pageHeader}>
+                <div><h1 className={styles.pageTitle}>Genel Ayarlar</h1><p className={styles.pageDesc}>Sitenin temel bilgilerini, logo ve meta verilerini buradan yönetebilirsiniz.</p></div>
+                <div className={styles.headerActions}><button className={styles.saveBtn} onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }}><Save size={16} /> {saved ? 'Ayarlar Kaydedildi ✓' : 'Ayarları Kaydet'}</button></div>
+              </div>
+              <div className={styles.formGrid}>
+                <div className={styles.formMain}>
+                  <div className={styles.sideCard} style={{ marginBottom: '24px' }}>
+                    <h3 className={styles.sideTitle}>Görsel Varlıklar</h3>
+                    <div className={styles.row2}>
+                      <div>
+                        <label className={styles.label}>Site Logosu</label>
+                        <div className={styles.uploadArea} style={{ height: '120px' }} onClick={() => { setUploadTarget('logo'); fileInputRef.current?.click(); }}>
+                          {uploading && uploadTarget === 'logo' ? (
+                            <div className={styles.uploadPlaceholder}><Loader2 size={24} className={styles.spin} /></div>
+                          ) : siteSettings.logo ? (
+                            <img src={siteSettings.logo} alt="Logo" className={styles.uploadPreview} style={{ objectFit: 'contain', padding: '10px' }} />
+                          ) : (
+                            <div className={styles.uploadPlaceholder}><Upload size={20} /> <span>Logo Yükle</span></div>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <label className={styles.label}>Favicon (32x32)</label>
+                        <div className={styles.uploadArea} style={{ height: '120px' }} onClick={() => { setUploadTarget('favicon'); fileInputRef.current?.click(); }}>
+                          {uploading && uploadTarget === 'favicon' ? (
+                            <div className={styles.uploadPlaceholder}><Loader2 size={24} className={styles.spin} /></div>
+                          ) : siteSettings.favicon ? (
+                            <img src={siteSettings.favicon} alt="Favicon" className={styles.uploadPreview} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                          ) : (
+                            <div className={styles.uploadPlaceholder}><Upload size={20} /> <span>Favicon Yükle</span></div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.sideCard}>
+                    <h3 className={styles.sideTitle}>SEO & Meta Bilgileri</h3>
+                    <div className={styles.formGroup}><label className={styles.label}>Site Başlığı (Title)</label><input className={styles.input} value={siteSettings.title} onChange={e => setSiteSettings({ ...siteSettings, title: e.target.value })} /></div>
+                    <div className={styles.formGroup}><label className={styles.label}>Site Açıklaması (Meta Description)</label><textarea className={styles.textarea} rows={4} value={siteSettings.description} onChange={e => setSiteSettings({ ...siteSettings, description: e.target.value })} /></div>
+                    <div className={styles.formGroup}><label className={styles.label}>Anahtar Kelimeler (Keywords)</label><input className={styles.input} placeholder="Örn: laboratuvar, test, analiz" value={siteSettings.keywords} onChange={e => setSiteSettings({ ...siteSettings, keywords: e.target.value })} /></div>
+                  </div>
+                </div>
+                
+                <div className={styles.formSide}>
+                  <div className={styles.sideCard}>
+                    <h3 className={styles.sideTitle}>Arama Motoru Önizleme</h3>
+                    <div className={styles.googlePreview}>
+                      <div className={styles.googleUrl}>https://lablog.com.tr</div>
+                      <div className={styles.googleTitle}>{siteSettings.title}</div>
+                      <div className={styles.googleDesc}>{siteSettings.description}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
-      {/* ── Blog Preview Modal ── */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        style={{ display: 'none' }} 
+        accept="image/*"
+        onChange={handleFileUpload}
+      />
+
       {showPreviewModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowPreviewModal(false)} style={{ zIndex: 9999 }}>
-          <div className={styles.modal} onClick={e => e.stopPropagation()} style={{ maxWidth: '800px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
-            <button className={styles.modalClose} onClick={() => setShowPreviewModal(false)}><X size={20} /></button>
-            
-            {/* Preview Content */}
-            <div style={{ padding: '20px' }}>
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Blog Yazısı Önizleme</h2>
+              <button className={styles.closeBtn} onClick={() => setShowPreviewModal(false)}><X size={20} /></button>
+            </div>
+
+            <div className={styles.modalBody}>
               <div style={{ display: 'inline-block', background: '#e0f2fe', color: '#0369a1', padding: '4px 12px', borderRadius: '100px', fontSize: '13px', fontWeight: '600', marginBottom: '16px' }}>{blogForm.category || 'Kategori Yok'}</div>
-              <h1 style={{ fontSize: '2.4rem', fontWeight: 'bold', color: '#111', marginBottom: '20px', lineHeight: '1.2' }}>{blogForm.title || 'Başlık Girilmedi'}</h1>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111', marginBottom: '20px', lineHeight: '1.2' }}>{blogForm.title || 'Başlık Girilmedi'}</h1>
               <div style={{ display: 'flex', gap: '24px', color: '#666', borderBottom: '1px solid #eee', paddingBottom: '20px', marginBottom: '30px', fontSize: '0.95rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={16} /> {blogForm.author || 'Belirsiz'}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={16} /> {blogForm.date || 'Tarih Yok'}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={16} /> {blogForm.date ? new Date(blogForm.date).toLocaleDateString('tr-TR') : 'Tarih Yok'}</div>
               </div>
-              
+
               {blogForm.coverImage && (
                 <div style={{ width: '100%', height: '400px', borderRadius: '16px', overflow: 'hidden', marginBottom: '40px' }}>
                   <img src={blogForm.coverImage} alt="Kapak" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               )}
-              
+
               {blogForm.excerpt && (
-                <p style={{ fontSize: '1.2rem', color: '#444', lineHeight: '1.6', marginBottom: '40px', fontWeight: '500' }}>{blogForm.excerpt}</p>
+                <p style={{ fontSize: '1rem', color: '#444', lineHeight: '1.6', marginBottom: '40px', fontWeight: '500' }}>{blogForm.excerpt}</p>
               )}
-              
-              <div 
-                style={{ fontSize: '1.05rem', color: '#333', lineHeight: '1.8' }}
+
+              <div
+                style={{ fontSize: '0.95rem', color: '#333', lineHeight: '1.8' }}
                 dangerouslySetInnerHTML={{ __html: blogForm.content || '<p style="color: #999; font-style: italic;">İçerik henüz girilmedi.</p>' }}
               />
             </div>
 
-            <div className={styles.modalActions} style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid #eee' }}>
-              <button className={styles.modalApproveBtn} style={{ background: '#0066cc', width: '100%' }} onClick={() => setShowPreviewModal(false)}>Önizlemeyi Kapat</button>
+            <div style={{ padding: '20px 32px', borderTop: '1px solid #f5f5f7', display: 'flex', justifyContent: 'flex-end' }}>
+              <button className={styles.saveBtn} style={{ width: '100%' }} onClick={() => setShowPreviewModal(false)}>Önizlemeyi Kapat</button>
             </div>
           </div>
         </div>

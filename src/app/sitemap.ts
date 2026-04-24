@@ -1,42 +1,42 @@
 import { MetadataRoute } from 'next';
-import { prisma } from '@/lib/prisma';
+import { services, blogs } from '@/data/mockData';
 
-export const dynamic = 'force-dynamic';
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = 'https://lablog.com.tr';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://lablog.com.tr'; // Bu URL canlı yayında güncellenmeli
-
-  // Blog postları çek
-  const blogs = await prisma.blogPost.findMany({ select: { slug: true, updatedAt: true } });
-  const blogEntries: MetadataRoute.Sitemap = blogs.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.updatedAt,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }));
-
-  // Analizleri çek
-  const analyses = await prisma.analysis.findMany({ select: { id: true, updatedAt: true } });
-  const analysisEntries: MetadataRoute.Sitemap = analyses.map((item) => ({
-    url: `${baseUrl}/analizler/${item.id}`,
-    lastModified: item.updatedAt,
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  }));
-
-  // Sabit sayfalar
-  const routes: MetadataRoute.Sitemap = [
+  // Static routes
+  const staticRoutes = [
     '',
+    '/analizler',
     '/blog',
-    '/contact',
-    '/about',
-    '/faq',
+    '/hakkimizda',
+    '/iletisim',
+    '/sikca-sorulan-sorular',
+    '/teklif-listesi',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: 1.0,
+    changeFrequency: 'daily' as const,
+    priority: route === '' ? 1 : 0.8,
   }));
 
-  return [...routes, ...blogEntries, ...analysisEntries];
+  // Dynamic blog routes
+  const blogRoutes = blogs.map((post) => ({
+    url: `${baseUrl}/blog/${post.id}`,
+    lastModified: new Date(post.date),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
+  // Dynamic service routes
+  const serviceRoutes = services
+    .filter(s => s.slug) // Only include services with slugs
+    .map((service) => ({
+      url: `${baseUrl}/analizler/${service.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }));
+
+  return [...staticRoutes, ...blogRoutes, ...serviceRoutes];
 }

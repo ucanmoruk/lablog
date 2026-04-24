@@ -11,9 +11,11 @@ interface AuthModalProps {
 }
 
 // Demo credentials
+const DEMO_ADMIN_USER = 'ucanmoruk';
 const DEMO_ADMIN_EMAIL = 'admin@labcozum.com';
 const DEMO_USER_EMAIL = 'kullanici@firma.com';
-const DEMO_PASSWORD = '123456';
+const DEMO_PASSWORD = 'Root@26';
+const DEMO_OLD_PASSWORD = '123456';
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
   const router = useRouter();
@@ -44,16 +46,27 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
 
     if (mode === 'login') {
       // Demo auth logic
-      if (form.password !== DEMO_PASSWORD) {
-        setError('E-posta veya şifre hatalı. Demo: admin@labcozum.com / 123456');
+      if (form.password !== DEMO_PASSWORD && form.password !== DEMO_OLD_PASSWORD) {
+        setError('Kullanıcı adı veya şifre hatalı.');
         return;
       }
-      const adminLogin = form.email === DEMO_ADMIN_EMAIL;
-      
+      const adminLogin = (form.email === DEMO_ADMIN_USER || form.email === DEMO_ADMIN_EMAIL) && form.password === DEMO_PASSWORD;
+
+      if (form.email !== DEMO_ADMIN_USER && form.email !== DEMO_ADMIN_EMAIL && form.email !== DEMO_USER_EMAIL) {
+        // Allow dynamic login for demo if password matches
+        if (form.password !== DEMO_PASSWORD && form.password !== DEMO_OLD_PASSWORD) {
+          setError('Hatalı kullanıcı adı veya parola.');
+          return;
+        }
+      } else if (form.password !== DEMO_PASSWORD && (form.email === DEMO_ADMIN_USER || form.password !== DEMO_OLD_PASSWORD)) {
+        setError('Hatalı parola.');
+        return;
+      }
+
       // Persist user for demo
       localStorage.setItem('labUser', JSON.stringify({
         email: form.email,
-        name: adminLogin ? 'Admin Uzman' : 'Ahmet Yılmaz',
+        name: adminLogin ? 'Admin Uzman' : 'Müşteri Kullanıcı',
         role: adminLogin ? 'admin' : 'customer'
       }));
 
@@ -104,8 +117,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               {isAdmin
                 ? 'Admin paneline yönlendiriliyorsunuz...'
                 : mode === 'login'
-                ? 'Müşteri panelinize yönlendiriliyorsunuz...'
-                : 'Hesabınız oluşturuldu. Panelinize yönlendiriliyorsunuz...'}
+                  ? 'Müşteri panelinize yönlendiriliyorsunuz...'
+                  : 'Hesabınız oluşturuldu. Panelinize yönlendiriliyorsunuz...'}
             </p>
           </div>
         ) : (
@@ -116,11 +129,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               <p>{mode === 'login' ? 'Analizlerinizi ve tekliflerinizi yönetmek için giriş yapın.' : 'Dijital laboratuvar deneyimine bugün başlayın.'}</p>
             </div>
 
-            {mode === 'login' && (
-              <div className={styles.demoHint}>
-                <strong>Demo:</strong> admin@labcozum.com <span className={styles.demoDivider}>veya</span> kullanici@firma.com · Şifre: <strong>123456</strong>
-              </div>
-            )}
 
             {error && <div className={styles.errorMsg}>{error}</div>}
 
@@ -172,12 +180,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               )}
 
               <div className={styles.inputGroup}>
-                <label>E-posta Adresi</label>
+                <label>E-posta veya Kullanıcı Adı</label>
                 <div className={styles.inputWrapper}>
                   <Mail size={18} className={styles.inputIcon} />
                   <input
-                    type="email"
-                    placeholder="adres@firma.com"
+                    type="text"
+                    placeholder="adres@firma.com veya kullanıcı adı"
                     value={form.email}
                     onChange={e => handleChange('email', e.target.value)}
                     required

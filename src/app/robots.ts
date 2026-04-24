@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: '/api/',
+      disallow: '/panel/',
     },
     sitemap: 'https://lablog.com.tr/sitemap.xml',
   };

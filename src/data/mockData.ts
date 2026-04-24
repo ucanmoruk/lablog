@@ -1032,7 +1032,7 @@ export const blogs: BlogPost[] = [
     "id": "kozmetik-r-nlerde-challenge-testi-neden-zorunludur",
     "title": "Kozmetik Ürünlerde Challenge Testi Neden Zorunludur?",
     "date": "2026-04-17",
-    "author": "Uzman Analist Ekibi",
+    "author": "Oğuzhan EKER",
     "category": "Kozmetik",
     "excerpt": "Bu makalede, sektördeki en son regülasyon güncellemeleri, uluslararası yasal gereklilikler ve laboratuvarımızda bu süreçlerin nasıl kusursuzca yönetildiği hakkında detaylı teknik bilgiler bulacaksınız.",
     "content": "Yasal mevzuatların her geçen gün sıkılaştığı global pazarda, firmaların yasal yaptırımlarla karşılaşmamak ve tüketici sağlığını korumak adına test süreçlerine büyük önem vermesi gerekmektedir. \n      \nBu makalede inceleyeceğimiz konu, sadece bir yasal zorunluluk değil, aynı zamanda markanızın güvenilirliğini piyasada tescilleyen kritik bir kalite kontrol basamağıdır. Akredite laboratuvar analizleri, ürünlerinizin dünya çapında serbest dolaşımını sağlar.\n      \nLaboratuvarımız, en güncel cihaz parkuru (LC-MS/MS, GC-MS, ICP-MS) ve ISO 17025 standartlarında işleyen kalite sistemiyle size bu süreçte kesintisiz destek sunar. Detaylı bilgi ve danışmanlık için teknik satış temsilcilerimizle iletişime geçebilirsiniz."
