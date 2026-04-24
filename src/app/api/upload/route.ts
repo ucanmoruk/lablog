@@ -14,20 +14,20 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
     
-    // FTP Configuration from User
+    // FTP Configuration from Environment Variables
     const client = new ftp.Client();
     // client.ftp.verbose = true;
 
     try {
       await client.access({
-        host: "www.rootarge.com",
-        user: "massgrup",
-        password: "FfU_Gw48@aseltk5",
-        secure: false // FTP usually uses plain text if not specified otherwise
+        host: process.env.FTP_HOST || "www.rootarge.com",
+        user: process.env.FTP_USER || "massgrup",
+        password: process.env.FTP_PASSWORD || "FfU_Gw48@aseltk5",
+        secure: false
       });
 
       // Navigate to the target directory
-      await client.ensureDir("/httpdocs/cosmo/lablog");
+      await client.ensureDir(process.env.FTP_PATH || "/httpdocs/cosmo/lablog");
       
       // Upload the file
       const source = new Readable();
@@ -36,8 +36,9 @@ export async function POST(req: NextRequest) {
 
       await client.uploadFrom(source, fileName);
       
-      // Construct the public URL as requested by the user
-      const publicUrl = `http://www.rootarge.com/cosmo/Numune/${fileName}`;
+      // Construct the public URL (Use environment variable for the base URL)
+      const baseUrl = process.env.NEXT_PUBLIC_UPLOAD_URL || "http://www.rootarge.com/cosmo/Numune";
+      const publicUrl = `${baseUrl}/${fileName}`;
       
       return NextResponse.json({ url: publicUrl });
 

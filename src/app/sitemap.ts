@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { services, blogs } from '@/data/mockData';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://lablog.com.tr';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lablog.com.tr';
 
   // Static routes
   const staticRoutes = [
