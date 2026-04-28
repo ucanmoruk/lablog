@@ -252,3 +252,41 @@
   .heroImageContainer { aspect-ratio: 16/9; }
   .relatedGrid { grid-template-columns: 1fr; }
 }
+
+/* TOC Styles */
+.tocContainer {
+  background: #f8f9fa;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 48px;
+}
+
+.tocTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 16px;
+}
+
+.tocList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tocItem {
+  margin-bottom: 8px;
+}
+
+.tocItem a {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.tocItem a:hover {
+  color: var(--primary);
+}
+

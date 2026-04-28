@@ -13,8 +13,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!blog) return { title: 'Bulunamadı' };
   
   return {
-    title: `${blog.title} | Laboratuvar Günlüğü`,
-    description: blog.excerpt,
+    title: blog.metaTitle || `${blog.title} | Laboratuvar Günlüğü`,
+    description: blog.seoDescription || blog.excerpt,
+    keywords: blog.keywords || blog.focusKeyword || blog.category,
   };
 }
 

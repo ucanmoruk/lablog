@@ -11,6 +11,26 @@ const calculateReadingTime = (text: string | null | undefined) => {
 };
 
 export default function BlogPostContent({ blog, related }: { blog: any; related: any[] }) {
+  // --- TOC Logic ---
+  const generateTOC = (html: string) => {
+    if (!html || html.length < 500) return { toc: [], processedHtml: html };
+
+    const toc: { id: string; text: string; level: number }[] = [];
+    let counter = 0;
+
+    // Replace H2 and H3 with version containing IDs and collect TOC items
+    const processedHtml = html.replace(/<(h[23])>(.*?)<\/\1>/gi, (match, tag, text) => {
+      const id = `heading-${counter++}`;
+      const plainText = text.replace(/<[^>]*>?/gm, ''); // Strip any HTML from header text
+      toc.push({ id, text: plainText, level: parseInt(tag[1]) });
+      return `<${tag} id="${id}">${text}</${tag}>`;
+    });
+
+    return { toc, processedHtml };
+  };
+
+  const { toc, processedHtml } = generateTOC(blog.content);
+
   return (
     <main className={styles.main}>
       <div className={styles.breadcrumb}>
@@ -40,23 +60,48 @@ export default function BlogPostContent({ blog, related }: { blog: any; related:
 
         <div className={styles.layout}>
           <div className={styles.bodyTextContainer}>
-            <p className={styles.lead}>{blog.excerpt}</p>
+            {blog.excerpt && (
+              <div 
+                className={styles.lead}
+                dangerouslySetInnerHTML={{ __html: blog.excerpt }}
+              />
+            )}
+
+            {toc.length > 0 && (
+              <div className={styles.tocContainer}>
+                <h4 className={styles.tocTitle}>İçindekiler</h4>
+                <ul className={styles.tocList}>
+                  {toc.map(item => (
+                    <li key={item.id} className={styles.tocItem} style={{ paddingLeft: `${(item.level - 2) * 16}px` }}>
+                      <a href={`#${item.id}`}>{item.text}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             
             <div 
               className={styles.richText}
-              dangerouslySetInnerHTML={{ __html: blog.content.includes('<') ? blog.content : blog.content.replace(/\n/g, '<br/>') }}
+              dangerouslySetInnerHTML={{ __html: processedHtml.includes('<') ? processedHtml : processedHtml.replace(/\n/g, '<br/>') }}
             />
 
             <footer className={styles.articleFooter}>
               <div className={styles.share}>
                 <span>Paylaş:</span>
-                <button className={styles.shareBtn} onClick={() => alert("Paylaşım menüsü")}>
+                <button className={styles.shareBtn} onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({ title: blog.title, url: window.location.href });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert("Link kopyalandı!");
+                  }
+                }}>
                   <Share2 size={16} />
                 </button>
               </div>
               <div className={styles.tags}>
-                {['Analiz', 'Mevzuat', blog.category].map(t => (
-                  <span key={t} className={styles.tag}>#{t}</span>
+                {(blog.keywords || blog.category || '').split(',').map((t: string) => (
+                  <span key={t} className={styles.tag}>#{t.trim()}</span>
                 ))}
               </div>
             </footer>

@@ -11,13 +11,20 @@ export const metadata = {
 
 export default async function BlogListPage() {
   let blogs = [];
+  let categories: string[] = [];
   try {
     blogs = await prisma.blogPost.findMany({
       orderBy: { date: 'desc' }
     });
     
+    const dbCategories = await prisma.category.findMany({
+      where: { type: 'blog' },
+      orderBy: { name: 'asc' }
+    });
+    categories = dbCategories.map((c: any) => c.name);
+
     if (blogs.length === 0) {
-      return <BlogListContent blogs={mockBlogs as any} />;
+      return <BlogListContent blogs={mockBlogs as any} categories={categories.length > 0 ? categories : undefined} />;
     }
   } catch (error) {
     console.warn("Blog DB fetch failed, using mock data:", error);
@@ -29,5 +36,5 @@ export default async function BlogListPage() {
     date: b.date.toISOString().split('T')[0]
   }));
 
-  return <BlogListContent blogs={blogsData as any} />;
+  return <BlogListContent blogs={blogsData as any} categories={categories.length > 0 ? categories : undefined} />;
 }

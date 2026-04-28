@@ -30,7 +30,7 @@ interface BlogPost {
   coverImage?: string;
 }
 
-export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
+export default function BlogList({ blogs, categories }: { blogs: BlogPost[]; categories?: string[] }) {
   const [activeCat, setActiveCat] = useState('Tümü');
   const [search, setSearch] = useState('');
   const [email, setEmail] = useState('');
@@ -38,15 +38,17 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
 
   if (!blogs || blogs.length === 0) return <div>Yazı bulunamadı.</div>;
 
+  // Dynamic categories from blog data or passed from server
+  const dynamicCategories = categories ? ['Tümü', ...categories] : ['Tümü', ...Array.from(new Set(blogs.map(b => b.category).filter(Boolean)))];
+
   // Find the manually selected featured post, or fallback to the latest one
   const featured = blogs.find(b => b.featured) || blogs[0];
   
-  // Only hide the featured post from the grid if NO category/search filter is active
-  // This prevents categories with only one post (the featured one) from appearing empty
   const isFiltered = activeCat !== 'Tümü' || search.trim() !== '';
-  const displayBlogs = isFiltered ? blogs : blogs.filter(b => b.id !== featured.id);
+  const filtered = blogs.filter(b => {
+    // If not filtered (Tümü and no search), we filter out the featured post from the grid
+    if (!isFiltered && b.id === featured.id) return false;
 
-  const filtered = displayBlogs.filter(b => {
     const matchCat = activeCat === 'Tümü' || b.category?.trim().toLowerCase() === activeCat.trim().toLowerCase();
     const matchSearch = !search || b.title.toLowerCase().includes(search.toLowerCase()) || b.excerpt.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
@@ -60,7 +62,10 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
           <div className={styles.heroContent}>
             <span className={styles.featuredLabel}>Öne Çıkan Yazı</span>
             <h1 className={styles.heroTitle}>{featured.title}</h1>
-            <p className={styles.heroExcerpt}>{featured.excerpt}</p>
+            <div 
+              className={styles.heroExcerpt}
+              dangerouslySetInnerHTML={{ __html: featured.excerpt }}
+            />
             <div className={styles.heroMeta}>
               <span className={styles.heroCat}>{featured.category}</span>
               <span className={styles.heroMetaItem}><Calendar size={15} /> {featured.date}</span>
@@ -119,7 +124,7 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
           </div>
 
           <div className={styles.cats}>
-            {ALL_CATS.map(c => (
+            {dynamicCategories.map(c => (
               <button key={c} onClick={() => setActiveCat(c)} className={`${styles.catBtn} ${activeCat === c ? styles.catBtnActive : ''}`}>
                 {c}
               </button>
@@ -139,7 +144,10 @@ export default function BlogList({ blogs }: { blogs: BlogPost[] }) {
                     <span><Clock size={13} /> {calculateReadingTime(blog.content)} dk</span>
                   </div>
                   <h3 className={styles.cardTitle}>{blog.title}</h3>
-                  <p className={styles.cardExc}>{blog.excerpt}</p>
+                  <div 
+                    className={styles.cardExc}
+                    dangerouslySetInnerHTML={{ __html: blog.excerpt }}
+                  />
                   <span className={styles.cardRead}>Devamını Oku <ArrowRight size={14} /></span>
                 </div>
               </Link>

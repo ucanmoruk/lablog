@@ -15,7 +15,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { title, category, author, excerpt, content, coverImage, featured, date } = data;
+    const { title, category, author, excerpt, content, coverImage, featured, date, keywords, focusKeyword, seoDescription, metaTitle } = data;
 
     // Generate slug from title
     const slug = title
@@ -37,6 +37,10 @@ export async function POST(request: Request) {
         coverImage,
         featured: !!featured,
         date: new Date(date),
+        keywords,
+        focusKeyword,
+        seoDescription,
+        metaTitle,
       }
     });
 
@@ -50,7 +54,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const data = await request.json();
-    const { id, title, category, author, excerpt, content, coverImage, featured, date } = data;
+    const { id, title, category, author, excerpt, content, coverImage, featured, date, keywords, focusKeyword, seoDescription, metaTitle } = data;
 
     const blog = await prisma.blogPost.update({
       where: { id },
@@ -63,6 +67,10 @@ export async function PUT(request: Request) {
         coverImage,
         featured: !!featured,
         date: new Date(date),
+        keywords,
+        focusKeyword,
+        seoDescription,
+        metaTitle,
       }
     });
 

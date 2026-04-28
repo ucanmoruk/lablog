@@ -33,10 +33,14 @@ model BlogPost {
   category   String
   excerpt    String
   content    String
-  coverImage String?
-  featured   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  coverImage     String?
+  featured       Boolean  @default(false)
+  keywords       String?
+  focusKeyword   String?
+  seoDescription String?
+  metaTitle      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model User {
@@ -68,5 +72,11 @@ model NewsletterSubscriber {
   id        String   @id @default(cuid())
   email     String   @unique
   createdAt DateTime @default(now())
+}
+
+model Category {
+  id    String @id @default(cuid())
+  name  String @unique
+  type  String @default("blog") // "blog" or "analysis"
 }
 

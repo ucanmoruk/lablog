@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       await client.uploadFrom(source, fileName);
       
       // Construct the public URL (Use environment variable for the base URL)
-      const baseUrl = process.env.NEXT_PUBLIC_UPLOAD_URL || "http://www.rootarge.com/cosmo/Numune";
+      const baseUrl = process.env.NEXT_PUBLIC_UPLOAD_URL || "https://rootarge.com/cosmo/Numune";
       const publicUrl = `${baseUrl}/${fileName}`;
       
       return NextResponse.json({ url: publicUrl });

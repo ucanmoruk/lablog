@@ -110,9 +110,15 @@ export default function AdminPanel() {
       const data = await res.json();
       if (Array.isArray(data)) setQuoteList(data);
     };
+    const fetchCategories = async () => {
+      const res = await fetch('/api/admin/categories');
+      const data = await res.json();
+      if (Array.isArray(data)) setCategoryList(data.map((c: any) => c.name));
+    };
     fetchBlogs();
     fetchSubscribers();
     fetchQuotes();
+    fetchCategories();
   }, [tab]);
   const [categoryList, setCategoryList] = useState(CATEGORIES);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -121,7 +127,9 @@ export default function AdminPanel() {
   const [blogForm, setBlogForm] = useState({
     title: '', category: '', author: 'Oğuzhan EKER',
     date: new Date().toISOString().split('T')[0],
-    excerpt: '', content: '', tags: '', coverImage: '',
+    excerpt: '', content: '', keywords: '', 
+    focusKeyword: '', seoDescription: '', metaTitle: '',
+    coverImage: '',
     featured: false,
   });
 
@@ -175,7 +183,10 @@ export default function AdminPanel() {
       date: post.date,
       excerpt: post.excerpt || '',
       content: post.content || '',
-      tags: 'analiz, sektör, uzmanlık',
+      keywords: post.keywords || '',
+      focusKeyword: post.focusKeyword || '',
+      seoDescription: post.seoDescription || '',
+      metaTitle: post.metaTitle || '',
       coverImage: post.coverImage || (post as any).image || '',
       featured: post.featured || false,
     });
@@ -203,7 +214,9 @@ export default function AdminPanel() {
     setBlogForm({
       title: '', category: '', author: 'Oğuzhan EKER',
       date: new Date().toISOString().split('T')[0],
-      excerpt: '', content: '', tags: '', coverImage: '',
+      excerpt: '', content: '', keywords: '', 
+      focusKeyword: '', seoDescription: '', metaTitle: '',
+      coverImage: '',
       featured: false,
     });
     setTab('blog-new');
@@ -604,6 +617,9 @@ export default function AdminPanel() {
                     <div className={styles.editorToolbar}>
                       <button type="button" className={styles.toolbarBtn} onClick={() => setBlogForm({ ...blogForm, content: blogForm.content + '\n<p>Yeni paragraf metni...</p>\n' })}>📝 Paragraf</button>
                       <button type="button" className={styles.toolbarBtn} onClick={() => setBlogForm({ ...blogForm, content: blogForm.content + '\n<h2>Başlık Ekle</h2>\n' })}>T Başlık</button>
+                      <button type="button" className={styles.toolbarBtn} onClick={() => setBlogForm({ ...blogForm, content: blogForm.content + '<strong>Kalın Metin</strong>' })}><b>B</b> Kalın</button>
+                      <button type="button" className={styles.toolbarBtn} onClick={() => setBlogForm({ ...blogForm, content: blogForm.content + '\n<ul>\n  <li>Liste öğesi 1</li>\n  <li>Liste öğesi 2</li>\n</ul>\n' })}>• Liste</button>
+                      <button type="button" className={styles.toolbarBtn} onClick={() => setBlogForm({ ...blogForm, content: blogForm.content + '\n<table style="width:100%; border-collapse: collapse; margin: 20px 0;">\n  <thead>\n    <tr style="background: #f8f9fa;">\n      <th style="border: 1px solid #ddd; padding: 12px;">Başlık 1</th>\n      <th style="border: 1px solid #ddd; padding: 12px;">Başlık 2</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td style="border: 1px solid #ddd; padding: 12px;">Hücre 1</td>\n      <td style="border: 1px solid #ddd; padding: 12px;">Hücre 2</td>\n    </tr>\n  </tbody>\n</table>\n' })}>📊 Tablo</button>
                       <button type="button" className={styles.toolbarBtn} onClick={() => { setUploadTarget('editor'); fileInputRef.current?.click(); }}>
                         {uploading && uploadTarget === 'editor' ? <Loader2 size={14} className={styles.spin} /> : '🖼️ Görsel Yükle'}
                       </button>
@@ -618,7 +634,7 @@ export default function AdminPanel() {
                       onChange={e => setBlogForm({ ...blogForm, content: e.target.value })}
                     />
                   </div>
-                  <div className={styles.formGroup}><label className={styles.label}>Etiketler</label><input className={styles.input} placeholder="analiz, kozmetik (virgülle ayırın)" value={blogForm.tags} onChange={e => setBlogForm({ ...blogForm, tags: e.target.value })} /></div>
+
                 </div>
                 <div className={styles.formSide}>
                   <div className={styles.sideCard}>
@@ -642,7 +658,23 @@ export default function AdminPanel() {
                     <input className={styles.input} style={{ marginTop: '8px' }} placeholder="Veya görsel URL girin..." value={blogForm.coverImage} onChange={e => setBlogForm({ ...blogForm, coverImage: e.target.value })} />
                   </div>
                   <div className={styles.sideCard}>
-                    <h3 className={styles.sideTitle}>SEO — URL Önizleme</h3>
+                    <h3 className={styles.sideTitle}>SEO Ayarları</h3>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Meta Başlık (Title)</label>
+                      <input className={styles.input} placeholder="Boş bırakılırsa yazı başlığı kullanılır" value={blogForm.metaTitle} onChange={e => setBlogForm({ ...blogForm, metaTitle: e.target.value })} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Odak Anahtar Kelime</label>
+                      <input className={styles.input} placeholder="Örn: kozmetik analizi" value={blogForm.focusKeyword} onChange={e => setBlogForm({ ...blogForm, focusKeyword: e.target.value })} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Anahtar Kelimeler</label>
+                      <input className={styles.input} placeholder="virgülle ayırın" value={blogForm.keywords} onChange={e => setBlogForm({ ...blogForm, keywords: e.target.value })} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>SEO Açıklaması (Description)</label>
+                      <textarea className={styles.textarea} rows={3} placeholder="Arama sonuçlarında görünecek kısa açıklama..." value={blogForm.seoDescription} onChange={e => setBlogForm({ ...blogForm, seoDescription: e.target.value })} />
+                    </div>
                     <div className={styles.slugPreview}><span className={styles.slugLabel}>URL:</span><span className={styles.slugValue}>/blog/{blogForm.title ? blogForm.title.toLowerCase().replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').substring(0, 50) : 'yazi-basligi'}</span></div>
                   </div>
                 </div>
@@ -735,7 +767,19 @@ export default function AdminPanel() {
               </div>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', maxWidth: '400px' }}>
                 <input className={styles.input} value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="Yeni kategori adı..." />
-                <button className={styles.saveBtn} onClick={() => { if (newCategoryName.trim() && !categoryList.includes(newCategoryName)) { setCategoryList([...categoryList, newCategoryName.trim()]); setNewCategoryName(''); } }}>Ekle</button>
+                <button className={styles.saveBtn} onClick={async () => { 
+                  if (newCategoryName.trim()) { 
+                    const res = await fetch('/api/admin/categories', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ name: newCategoryName.trim(), type: 'blog' })
+                    });
+                    if (res.ok) {
+                      setCategoryList([...categoryList, newCategoryName.trim()]); 
+                      setNewCategoryName(''); 
+                    }
+                  } 
+                }}>Ekle</button>
               </div>
               <div className={styles.listTable} style={{ maxWidth: '600px' }}>
                 <div className={styles.tableHead}><span>Kategori Adı</span><span>İşlem</span></div>
@@ -743,7 +787,20 @@ export default function AdminPanel() {
                   <div key={c} className={styles.tableRow}>
                     <span className={styles.tableTitle}>{c}</span>
                     <div className={styles.tableActions}>
-                      <button className={styles.deleteBtn} onClick={() => setCategoryList(categoryList.filter(cat => cat !== c))}><Trash2 size={14} /></button>
+                      <button className={styles.deleteBtn} onClick={async () => {
+                        // We need the ID to delete, but categoryList is just names. 
+                        // Let's fix this by fetching full objects or just searching by name.
+                        // For now, I'll fetch again or just let the user refresh.
+                        // Better way: search for the ID in the state if we had it.
+                        // I'll update the fetch to keep full objects.
+                        const res = await fetch('/api/admin/categories');
+                        const data = await res.json();
+                        const catObj = data.find((cat: any) => cat.name === c);
+                        if (catObj) {
+                          await fetch(`/api/admin/categories?id=${catObj.id}`, { method: 'DELETE' });
+                          setCategoryList(categoryList.filter(cat => cat !== c));
+                        }
+                      }}><Trash2 size={14} /></button>
                     </div>
                   </div>
                 ))}
@@ -843,7 +900,7 @@ export default function AdminPanel() {
         type="file" 
         ref={fileInputRef} 
         style={{ display: 'none' }} 
-        accept="image/*"
+        accept="image/*,.webp"
         onChange={handleFileUpload}
       />
 
@@ -870,7 +927,10 @@ export default function AdminPanel() {
               )}
 
               {blogForm.excerpt && (
-                <p style={{ fontSize: '1rem', color: '#444', lineHeight: '1.6', marginBottom: '40px', fontWeight: '500' }}>{blogForm.excerpt}</p>
+                <div 
+                  style={{ fontSize: '1rem', color: '#444', lineHeight: '1.6', marginBottom: '40px', fontWeight: '500' }}
+                  dangerouslySetInnerHTML={{ __html: blogForm.excerpt }}
+                />
               )}
 
               <div
