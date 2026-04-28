@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
-import { services, blogs } from '@/data/mockData';
+import { prisma } from '@/lib/prisma';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lablog.com.tr';
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://laboratuvardan.com';
 
   // Static routes
   const staticRoutes = [
@@ -20,23 +20,39 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === '' ? 1 : 0.8,
   }));
 
-  // Dynamic blog routes
-  const blogRoutes = blogs.map((post) => ({
-    url: `${baseUrl}/blog/${post.id}`,
-    lastModified: new Date(post.date),
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }));
-
-  // Dynamic service routes
-  const serviceRoutes = services
-    .filter(s => s.slug) // Only include services with slugs
-    .map((service) => ({
-      url: `${baseUrl}/analizler/${service.slug}`,
-      lastModified: new Date(),
+  // Dynamic blog routes from Database
+  let blogRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const dbBlogs = await prisma.blogPost.findMany({
+      select: { slug: true, updatedAt: true }
+    });
+    blogRoutes = dbBlogs.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: post.updatedAt,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }));
+  } catch (e) {
+    console.error("Sitemap blog fetch error:", e);
+  }
 
-  return [...staticRoutes, ...blogRoutes, ...serviceRoutes];
+  // Dynamic analysis routes from Database
+  let analysisRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const dbAnalyses = await prisma.analysis.findMany({
+      select: { slug: true, updatedAt: true }
+    });
+    analysisRoutes = dbAnalyses
+      .filter(a => a.slug)
+      .map((analysis) => ({
+        url: `${baseUrl}/analizler/${analysis.slug}`,
+        lastModified: analysis.updatedAt,
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      }));
+  } catch (e) {
+    console.error("Sitemap analysis fetch error:", e);
+  }
+
+  return [...staticRoutes, ...blogRoutes, ...analysisRoutes];
 }
