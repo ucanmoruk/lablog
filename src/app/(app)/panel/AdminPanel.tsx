@@ -113,15 +113,17 @@ export default function AdminPanel() {
     const fetchCategories = async () => {
       const res = await fetch('/api/admin/categories');
       const data = await res.json();
-      if (Array.isArray(data)) setCategoryList(data.map((c: any) => c.name));
+      if (Array.isArray(data)) setCategoryList(data);
     };
     fetchBlogs();
     fetchSubscribers();
     fetchQuotes();
     fetchCategories();
   }, [tab]);
-  const [categoryList, setCategoryList] = useState(CATEGORIES);
+  const [categoryList, setCategoryList] = useState<any[]>([]);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const [blogForm, setBlogForm] = useState({
@@ -180,7 +182,7 @@ export default function AdminPanel() {
       title: post.title,
       category: post.category,
       author: post.author || 'Oğuzhan EKER',
-      date: post.date,
+      date: post.date ? new Date(post.date).toISOString().split('T')[0] : '',
       excerpt: post.excerpt || '',
       content: post.content || '',
       keywords: post.keywords || '',
@@ -639,7 +641,7 @@ export default function AdminPanel() {
                 <div className={styles.formSide}>
                   <div className={styles.sideCard}>
                     <h3 className={styles.sideTitle}>Yayın Bilgileri</h3>
-                    <div className={styles.formGroup}><label className={styles.label}>Kategori *</label><select className={styles.select} value={blogForm.category} onChange={e => setBlogForm({ ...blogForm, category: e.target.value })}><option value="">Seçin...</option>{categoryList.map(c => <option key={c}>{c}</option>)}</select></div>
+                    <div className={styles.formGroup}><label className={styles.label}>Kategori *</label><select className={styles.select} value={blogForm.category} onChange={e => setBlogForm({ ...blogForm, category: e.target.value })}><option value="">Seçin...</option>{categoryList.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
                     <div className={styles.formGroup}><label className={styles.label}>Yazar</label><input className={styles.input} value={blogForm.author} onChange={e => setBlogForm({ ...blogForm, author: e.target.value })} /></div>
                     <div className={styles.formGroup}><label className={styles.label}>Yayın Tarihi</label><input type="date" className={styles.input} value={blogForm.date} onChange={e => setBlogForm({ ...blogForm, date: e.target.value })} /></div>
                     <div className={styles.formGroup} style={{ marginTop: '10px' }}><label className={styles.checkLabel}><input type="checkbox" checked={blogForm.featured} onChange={e => setBlogForm({ ...blogForm, featured: e.target.checked })} /> <strong>Öne Çıkan Yazı</strong></label></div>
@@ -692,7 +694,7 @@ export default function AdminPanel() {
                 <div className={styles.formMain}>
                   <div className={styles.formGroup}><label className={styles.label}>Analiz Adı *</label><input className={styles.input} placeholder="Örn: Mikrobiyolojik Patojen Taraması" value={analysisForm.title} onChange={e => setAnalysisForm({ ...analysisForm, title: e.target.value })} /></div>
                   <div className={styles.row2}>
-                    <div className={styles.formGroup}><label className={styles.label}>Kategori *</label><select className={styles.select} value={analysisForm.category} onChange={e => setAnalysisForm({ ...analysisForm, category: e.target.value })}><option value="">Seçin...</option>{CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></div>
+                    <div className={styles.formGroup}><label className={styles.label}>Kategori *</label><select className={styles.select} value={analysisForm.category} onChange={e => setAnalysisForm({ ...analysisForm, category: e.target.value })}><option value="">Seçin...</option>{categoryList.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
                     <div className={styles.formGroup}><label className={styles.label}>Sektör</label><select className={styles.select} value={analysisForm.sector} onChange={e => setAnalysisForm({ ...analysisForm, sector: e.target.value })}><option value="">Seçin...</option>{SECTORS.map(s => <option key={s}>{s}</option>)}</select></div>
                   </div>
                   <div className={styles.formGroup}><label className={styles.label}>Açıklama *</label><textarea className={styles.textarea} rows={5} placeholder="Analizin kapsamını açıklayın..." value={analysisForm.description} onChange={e => setAnalysisForm({ ...analysisForm, description: e.target.value })} /></div>
@@ -775,7 +777,8 @@ export default function AdminPanel() {
                       body: JSON.stringify({ name: newCategoryName.trim(), type: 'blog' })
                     });
                     if (res.ok) {
-                      setCategoryList([...categoryList, newCategoryName.trim()]); 
+                      const addedCat = await res.json();
+                      setCategoryList([...categoryList, addedCat]); 
                       setNewCategoryName(''); 
                     }
                   } 
@@ -784,23 +787,49 @@ export default function AdminPanel() {
               <div className={styles.listTable} style={{ maxWidth: '600px' }}>
                 <div className={styles.tableHead}><span>Kategori Adı</span><span>İşlem</span></div>
                 {categoryList.map(c => (
-                  <div key={c} className={styles.tableRow}>
-                    <span className={styles.tableTitle}>{c}</span>
+                  <div key={c.id} className={styles.tableRow}>
+                    {editingCategoryId === c.id ? (
+                      <input 
+                        className={styles.input} 
+                        value={editingCategoryName} 
+                        onChange={e => setEditingCategoryName(e.target.value)}
+                        autoFocus
+                      />
+                    ) : (
+                      <span className={styles.tableTitle}>{c.name}</span>
+                    )}
                     <div className={styles.tableActions}>
-                      <button className={styles.deleteBtn} onClick={async () => {
-                        // We need the ID to delete, but categoryList is just names. 
-                        // Let's fix this by fetching full objects or just searching by name.
-                        // For now, I'll fetch again or just let the user refresh.
-                        // Better way: search for the ID in the state if we had it.
-                        // I'll update the fetch to keep full objects.
-                        const res = await fetch('/api/admin/categories');
-                        const data = await res.json();
-                        const catObj = data.find((cat: any) => cat.name === c);
-                        if (catObj) {
-                          await fetch(`/api/admin/categories?id=${catObj.id}`, { method: 'DELETE' });
-                          setCategoryList(categoryList.filter(cat => cat !== c));
-                        }
-                      }}><Trash2 size={14} /></button>
+                      {editingCategoryId === c.id ? (
+                        <>
+                          <button className={styles.saveBtn} style={{ padding: '4px 10px', fontSize: '12px' }} onClick={async () => {
+                            const res = await fetch('/api/admin/categories', {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ id: c.id, name: editingCategoryName, type: c.type })
+                            });
+                            if (res.ok) {
+                              setCategoryList(categoryList.map(cat => cat.id === c.id ? { ...cat, name: editingCategoryName } : cat));
+                              setEditingCategoryId(null);
+                            }
+                          }}><Save size={14} /></button>
+                          <button className={styles.deleteBtn} onClick={() => setEditingCategoryId(null)}><X size={14} /></button>
+                        </>
+                      ) : (
+                        <>
+                          <button className={styles.editBtn} onClick={() => {
+                            setEditingCategoryId(c.id);
+                            setEditingCategoryName(c.name);
+                          }}><PenSquare size={14} /></button>
+                          <button className={styles.deleteBtn} onClick={async () => {
+                            if (confirm('Bu kategoriyi silmek istediğinize emin misiniz?')) {
+                              const res = await fetch(`/api/admin/categories?id=${c.id}`, { method: 'DELETE' });
+                              if (res.ok) {
+                                setCategoryList(categoryList.filter(cat => cat.id !== c.id));
+                              }
+                            }
+                          }}><Trash2 size={14} /></button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}

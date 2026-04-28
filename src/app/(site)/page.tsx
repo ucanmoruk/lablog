@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import HomeClient from "./HomeClient";
 import { blogs as mockBlogs } from "@/data/mockData";
 
+export const dynamic = 'force-dynamic';
+
 // Define a common interface for blogs to avoid any
 interface BlogDisplay {
   id: string;

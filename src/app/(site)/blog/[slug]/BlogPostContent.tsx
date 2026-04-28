@@ -10,7 +10,7 @@ const calculateReadingTime = (text: string | null | undefined) => {
   return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
 };
 
-export default function BlogPostContent({ blog, related }: { blog: any; related: any[] }) {
+export default function BlogPostContent({ blog, related, recent }: { blog: any; related: any[]; recent: any[] }) {
   // --- TOC Logic ---
   const generateTOC = (html: string) => {
     if (!html || html.length < 500) return { toc: [], processedHtml: html };
@@ -88,7 +88,7 @@ export default function BlogPostContent({ blog, related }: { blog: any; related:
             <footer className={styles.articleFooter}>
               <div className={styles.share}>
                 <span>Paylaş:</span>
-                <button className={styles.shareBtn} onClick={() => {
+                <button className={styles.shareBtn} style={{ marginLeft: '12px', marginRight: '16px' }} onClick={() => {
                   if (navigator.share) {
                     navigator.share({ title: blog.title, url: window.location.href });
                   } else {
@@ -130,8 +130,21 @@ export default function BlogPostContent({ blog, related }: { blog: any; related:
                   <div key={item.n} className={styles.popularItem} onClick={() => alert(`${item.n} için teklif sayfasına yönlendiriliyorsunuz...`)}>
                     <span className={styles.popularIco}>{item.i}</span>
                     <span className={styles.popularName}>{item.n}</span>
-                    <ChevronLeft size={14} className={styles.popularArr} />
+                    <ArrowRight size={14} className={styles.popularArr} />
                   </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.popularCard} style={{ marginTop: '24px' }}>
+              <h3 className={styles.popularTitle}>En Yeniler</h3>
+              <div className={styles.popularList}>
+                {recent.map(post => (
+                  <Link href={`/blog/${post.slug}`} key={post.id} className={styles.popularItem}>
+                    <span className={styles.popularIco}>📄</span>
+                    <span className={styles.popularName} style={{ fontSize: '13px' }}>{post.title}</span>
+                    <ArrowRight size={14} className={styles.popularArr} />
+                  </Link>
                 ))}
               </div>
             </div>

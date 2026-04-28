@@ -29,6 +29,23 @@ export async function POST(request: Request) {
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    const { id, name, type } = await request.json();
+    if (!id || !name) return NextResponse.json({ error: 'ID ve isim gerekli' }, { status: 400 });
+
+    const category = await prisma.category.update({
+      where: { id },
+      data: { name, type }
+    });
+
+    return NextResponse.json(category);
+  } catch (error) {
+    console.error('Category update error:', error);
+    return NextResponse.json({ error: 'Güncelleme başarısız' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -45,3 +62,4 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Silme başarısız' }, { status: 500 });
   }
 }
+

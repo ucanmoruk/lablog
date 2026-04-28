@@ -54,6 +54,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     related = [...related, ...more];
   }
 
+  const recent = await prisma.blogPost.findMany({
+    take: 5,
+    orderBy: { date: 'desc' },
+    select: { id: true, title: true, slug: true, date: true }
+  });
+
   const blogData = {
     ...blog,
     date: blog.date.toISOString().split('T')[0]
@@ -64,5 +70,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     date: b.date.toISOString().split('T')[0]
   }));
 
-  return <BlogPostContent blog={blogData as any} related={relatedData as any} />;
+  const recentData = recent.map(b => ({
+    ...b,
+    date: b.date.toISOString().split('T')[0]
+  }));
+
+  return <BlogPostContent blog={blogData as any} related={relatedData as any} recent={recentData as any} />;
 }

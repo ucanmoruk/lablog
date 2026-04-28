@@ -110,6 +110,30 @@
 
 .richText p { margin-bottom: 24px; }
 
+.richText table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 32px auto;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.richText th, .richText td {
+  border: 1px solid #e5e7eb;
+  padding: 14px 18px;
+  text-align: left;
+}
+
+.richText th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #111827;
+}
+
+.richText tr:nth-child(even) {
+  background: #fcfcfc;
+}
+
 .richText h2 {
   font-size: 1.8rem;
   font-weight: 700;
@@ -159,11 +183,11 @@
 }
 .shareBtn:hover { background: #f5f5f7; }
 
-.tags { display: flex; gap: 8px; }
-.tag { font-size: 13px; color: var(--text-secondary); background: #f5f5f7; padding: 4px 10px; border-radius: 4px; }
+.tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag { font-size: 13px; color: var(--text-secondary); background: #f5f5f7; padding: 4px 10px; border-radius: 4px; white-space: nowrap; }
 
 /* Sidebar */
-.sidebar { position: sticky; top: 100px; }
+.sidebar { position: sticky; top: 120px; align-self: start; }
 .sidebarCard {
   background: #000;
   color: #fff;
@@ -209,10 +233,11 @@
   transition: opacity 0.2s;
 }
 .popularItem:hover { opacity: 0.7; }
+.popularItem { text-decoration: none; }
 .popularItem:not(:last-child) { border-bottom: 1px solid #f5f5f7; }
 .popularIco { font-size: 16px; width: 24px; text-align: center; }
 .popularName { font-size: 14px; font-weight: 500; color: #424245; flex: 1; }
-.popularArr { color: var(--text-tertiary); transform: rotate(180deg); }
+.popularArr { color: var(--text-tertiary); }
 
 /* Related */
 .relatedSection {
