@@ -15,13 +15,20 @@ model Analysis {
   slug              String?  @unique
   title             String
   description       String
-  category          String
+  category          String?  // Kategoriyi opsiyonel yapıyoruz
+  sector            String?  // Sektörü geçici olarak opsiyonel yapıyoruz
   popular           Boolean  @default(false)
   standards         String?
   turnaroundTime    String?
   sampleRequirement String?
+  price             String?  @default("İstek Üzerine")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+model Sector {
+  id    String @id @default(cuid())
+  name  String @unique
 }
 
 model BlogPost {
@@ -80,3 +87,12 @@ model Category {
   type  String @default("blog") // "blog" or "analysis"
 }
 
+model SiteSettings {
+  id          String   @id @default("default")
+  logo        String?
+  favicon     String?
+  title       String   @default("Laboratuvar Çözüm Merkezi")
+  description String   @default("Profesyonel laboratuvar analiz ve danışmanlık hizmetleri.")
+  keywords    String?  @default("laboratuvar, analiz, test, kozmetik, ilaç")
+  updatedAt   DateTime @updatedAt
+}

@@ -23,8 +23,11 @@ export async function POST(req: NextRequest) {
         host: process.env.FTP_HOST || "www.rootarge.com",
         user: process.env.FTP_USER || "massgrup",
         password: process.env.FTP_PASSWORD || "FfU_Gw48@aseltk5",
-        secure: false
+        secure: false,
+        port: 21
       });
+
+
 
       // Navigate to the target directory
       await client.ensureDir(process.env.FTP_PATH || "/httpdocs/cosmo/lablog");

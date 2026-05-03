@@ -6,13 +6,13 @@ import { useState, useEffect } from "react";
 import { useQuote } from "@/context/QuoteContext";
 import AuthModal from "./AuthModal";
 
-export default function Navbar() {
+export default function Navbar({ serverLogo }: { serverLogo?: string | null }) {
   const [scrolled, setScrolled] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const { quotes } = useQuote();
-
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+  const [logo, setLogo] = useState<string | null>(serverLogo || null);
 
   useEffect(() => {
     const checkUser = () => {
@@ -21,6 +21,17 @@ export default function Navbar() {
       else setUser(null);
     };
     
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch('/api/admin/settings');
+        const data = await res.json();
+        if (data && data.logo) setLogo(data.logo);
+      } catch (e) {
+        console.error("Logo fetch error:", e);
+      }
+    };
+
+    if (!serverLogo) fetchSettings();
     checkUser();
     window.addEventListener('storage', checkUser);
 
@@ -56,11 +67,17 @@ export default function Navbar() {
         <div className={styles.inner}>
           {/* Logo */}
           <Link href="/" className={styles.logo}>
-            <div className={styles.logoMark}>
-              <FlaskConical size={18} strokeWidth={2.5} />
-            </div>
-            <span className={styles.logoText}>LabÇözüm</span>
-            <span className={styles.logoSub}>Merkezi</span>
+            {logo ? (
+              <img src={logo} alt="Logo" className={styles.logoImage} />
+            ) : (
+              <>
+                <div className={styles.logoMark}>
+                  <FlaskConical size={18} strokeWidth={2.5} />
+                </div>
+                <span className={styles.logoText}>LabÇözüm</span>
+                <span className={styles.logoSub}>Merkezi</span>
+              </>
+            )}
           </Link>
 
           {/* Nav Links */}

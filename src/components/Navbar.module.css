@@ -4,9 +4,9 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  background: transparent;
-  transition: background var(--transition), box-shadow var(--transition), border-color var(--transition);
-  border-bottom: 1px solid transparent;
+  background: var(--background); /* Varsayılan olarak sayfa rengiyle başlasın */
+  transition: all 0.3s ease;
+  border-bottom: 1px solid var(--border);
 }
 
 .scrolled {
@@ -17,14 +17,21 @@
   box-shadow: 0 1px 0 var(--border);
 }
 
+.scrolled .inner {
+  min-height: 60px;
+}
+
 .inner {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 48px;
-  height: 68px;
+  min-height: 68px;
+  height: auto;
   display: flex;
   align-items: center;
-  gap: 48px;
+  justify-content: space-between; /* Üç ana parçayı yay */
+  gap: 20px;
+  transition: min-height 0.3s ease;
 }
 
 /* Logo */
@@ -33,7 +40,22 @@
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  flex-shrink: 0;
+  flex: 1; /* Sol tarafı kapla */
+}
+
+.logoImage {
+  height: 90px;
+  width: auto;
+  object-fit: contain;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  transition: height 0.3s ease, margin 0.3s ease;
+}
+
+.header.scrolled .logoImage {
+  height: 50px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .logoMark {
@@ -69,8 +91,9 @@
 .nav {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex: 1;
+  gap: 16px;
+  flex: 2;
+  justify-content: center;
 }
 
 .navGroup {
@@ -168,7 +191,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .quoteBtn {
@@ -286,6 +310,12 @@
     padding: 0 24px;
     gap: 24px;
   }
-  .navGroup { display: none; }
-  .ctaBtn { display: none; }
+
+  .navGroup {
+    display: none;
+  }
+
+  .ctaBtn {
+    display: none;
+  }
 }

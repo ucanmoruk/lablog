@@ -1,11 +1,22 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { QuoteProvider } from "@/context/QuoteContext";
+import { prisma } from "@/lib/prisma";
 
-export const metadata: Metadata = {
-  title: "Laboratuvar Çözüm Merkezi | Test, Analiz ve Belgelendirme",
-  description: "Türkiye'nin En Kapsamlı Laboratuvar Çözüm Merkezi. Kozmetik, ilaç, hammadde, tekstil, gıda ve daha fazlası için test, analiz ve belgelendirme arama motoru.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await (prisma as any).siteSettings.findUnique({
+    where: { id: 'default' }
+  });
+
+  return {
+    title: settings?.title || "Laboratuvar Çözüm Merkezi | Test, Analiz ve Belgelendirme",
+    description: settings?.description || "Türkiye'nin En Kapsamlı Laboratuvar Çözüm Merkezi.",
+    keywords: settings?.keywords || "laboratuvar, analiz, test",
+    icons: {
+      icon: settings?.favicon || "/favicon.ico",
+    }
+  };
+}
 
 export default function RootLayout({
   children,

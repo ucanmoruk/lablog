@@ -1,15 +1,19 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { prisma } from "@/lib/prisma";
 
-// Public-facing pages with Navbar and Footer
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const settings = await (prisma as any).siteSettings.findUnique({
+    where: { id: 'default' }
+  });
+
   return (
     <>
-      <Navbar />
-      <main style={{ minHeight: 'calc(100vh - 68px)' }}>
+      <Navbar serverLogo={settings?.logo} />
+      <main style={{ minHeight: '100vh', paddingTop: '120px' }}>
         {children}
       </main>
-      <Footer />
+      <Footer serverLogo={settings?.logo} />
     </>
   );
 }

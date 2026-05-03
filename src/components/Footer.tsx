@@ -1,8 +1,25 @@
+"use client";
 import Link from "next/link";
 import { FlaskConical, Phone, Mail, MapPin, Share2, Link2, Rss } from "lucide-react";
+import { useState, useEffect } from "react";
 import styles from "./Footer.module.css";
 
-export default function Footer() {
+export default function Footer({ serverLogo }: { serverLogo?: string | null }) {
+  const [logo, setLogo] = useState<string | null>(serverLogo || null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch('/api/admin/settings');
+        const data = await res.json();
+        if (data && data.logo) setLogo(data.logo);
+      } catch (e) {
+        console.error("Footer logo fetch error:", e);
+      }
+    };
+    if (!serverLogo) fetchSettings();
+  }, [serverLogo]);
+
   return (
     <footer className={styles.footer}>
       <div className={styles.accredBand}>
@@ -17,8 +34,14 @@ export default function Footer() {
         <div className={styles.grid}>
           <div className={styles.brandCol}>
             <Link href="/" className={styles.logoRow}>
-              <div className={styles.logoMark}><FlaskConical size={18} strokeWidth={2.5}/></div>
-              <span className={styles.logoText}>LabÇözüm Merkezi</span>
+              {logo ? (
+                <img src={logo} alt="Logo" className={styles.logoImage} />
+              ) : (
+                <>
+                  <div className={styles.logoMark}><FlaskConical size={18} strokeWidth={2.5}/></div>
+                  <span className={styles.logoText}>LabÇözüm Merkezi</span>
+                </>
+              )}
             </Link>
             <p className={styles.desc}>1500+ akredite parametre ile kozmetik, ilaç, gıda, tekstil ve daha pek çok alanda test, analiz ve belgelendirme hizmetleri.</p>
             <div className={styles.contact}>

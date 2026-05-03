@@ -10,7 +10,7 @@ import { services } from '@/data/mockData';
 import { blogs as mockBlogs } from '@/data/mockData';
 import styles from './panel.module.css';
 
-type Tab = 'dashboard' | 'blog-new' | 'blog-list' | 'analysis-new' | 'analysis-list' | 'quotes' | 'categories' | 'newsletter' | 'settings';
+type Tab = 'dashboard' | 'blog-new' | 'blog-list' | 'analysis-new' | 'analysis-list' | 'quotes' | 'categories' | 'sectors' | 'newsletter' | 'settings';
 
 const CATEGORIES = ['Kozmetik', 'İlaç ve Hammadde', 'Tekstil ve Deri', 'Takviye Edici Gıda', 'Belgelendirme', 'Çevre ve Su', 'Ambalaj ve Plastik', 'Mikrobiyoloji'];
 const SECTORS = ['Kozmetik', 'İlaç ve Hammadde', 'Tekstil ve Deri', 'Gıda & Takviye Edici Gıda', 'Çevre ve Su', 'Ambalaj ve Plastik', 'Mikrobiyoloji', 'Belgelendirme'];
@@ -93,6 +93,11 @@ export default function AdminPanel() {
   const [blogList, setBlogList] = useState<any[]>([]);
   const [subscriberList, setSubscriberList] = useState<any[]>([]);
   const [quoteList, setQuoteList] = useState<any[]>([]);
+  const [sectorList, setSectorList] = useState<any[]>([]);
+  const [analysisList, setAnalysisList] = useState<any[]>([]);
+  const [newSectorName, setNewSectorName] = useState('');
+  const [editingSectorId, setEditingSectorId] = useState<string | null>(null);
+  const [editingSectorName, setEditingSectorName] = useState('');
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -115,10 +120,28 @@ export default function AdminPanel() {
       const data = await res.json();
       if (Array.isArray(data)) setCategoryList(data);
     };
+    const fetchSectors = async () => {
+      const res = await fetch('/api/admin/sectors');
+      const data = await res.json();
+      if (Array.isArray(data)) setSectorList(data);
+    };
+    const fetchAnalyses = async () => {
+      const res = await fetch('/api/admin/analysis');
+      const data = await res.json();
+      if (Array.isArray(data)) setAnalysisList(data);
+    };
+    const fetchSettings = async () => {
+      const res = await fetch('/api/admin/settings');
+      const data = await res.json();
+      if (data && !data.error) setSiteSettings(data);
+    };
     fetchBlogs();
     fetchSubscribers();
     fetchQuotes();
     fetchCategories();
+    fetchSectors();
+    fetchAnalyses();
+    fetchSettings();
   }, [tab]);
   const [categoryList, setCategoryList] = useState<any[]>([]);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -160,11 +183,35 @@ export default function AdminPanel() {
         } else {
           alert('Hata oluştu.');
         }
+      } else if (tab === 'analysis-new') {
+        const method = editingAnalysisId ? 'PUT' : 'POST';
+        const body = editingAnalysisId ? { id: editingAnalysisId, ...analysisForm } : analysisForm;
+
+        const res = await fetch('/api/admin/analysis', {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          setEditingAnalysisId(null);
+          setTab('analysis-list');
+        } else {
+          alert('Analiz kaydedilirken hata oluştu.');
+        }
       }
     } catch (err) {
       alert('Bağlantı hatası.');
     } finally {
       setSaved(false);
+    }
+  };
+
+  const handleDeleteAnalysis = async (id: string) => {
+    if (!confirm('Bu analizi silmek istediğinize emin misiniz?')) return;
+    const res = await fetch(`/api/admin/analysis?id=${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      setAnalysisList(analysisList.filter(a => a.id !== id));
     }
   };
 
@@ -307,7 +354,7 @@ export default function AdminPanel() {
   const vatAmount = (subtotal - discountAmount) * (vatRate / 100);
   const grandTotal = (subtotal - discountAmount) + vatAmount;
 
-  const liveServices = services.slice(0, 100);
+  const liveServices = analysisList;
   const liveBlogPosts = blogList;
 
   return (
@@ -365,6 +412,9 @@ export default function AdminPanel() {
               </button>
               <button onClick={() => setTab('analysis-list')} className={`${styles.navBtn} ${tab === 'analysis-list' ? styles.active : ''}`}>
                 <PenSquare size={18} /> Analizler <span className={styles.navCount}>{liveServices.length}</span>
+              </button>
+              <button onClick={() => setTab('sectors')} className={`${styles.navBtn} ${tab === 'sectors' ? styles.active : ''}`}>
+                <ChevronRight size={18} /> Sektör Yönetimi
               </button>
             </div>
             <div className={styles.navSection}>
@@ -694,8 +744,7 @@ export default function AdminPanel() {
                 <div className={styles.formMain}>
                   <div className={styles.formGroup}><label className={styles.label}>Analiz Adı *</label><input className={styles.input} placeholder="Örn: Mikrobiyolojik Patojen Taraması" value={analysisForm.title} onChange={e => setAnalysisForm({ ...analysisForm, title: e.target.value })} /></div>
                   <div className={styles.row2}>
-                    <div className={styles.formGroup}><label className={styles.label}>Kategori *</label><select className={styles.select} value={analysisForm.category} onChange={e => setAnalysisForm({ ...analysisForm, category: e.target.value })}><option value="">Seçin...</option>{categoryList.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
-                    <div className={styles.formGroup}><label className={styles.label}>Sektör</label><select className={styles.select} value={analysisForm.sector} onChange={e => setAnalysisForm({ ...analysisForm, sector: e.target.value })}><option value="">Seçin...</option>{SECTORS.map(s => <option key={s}>{s}</option>)}</select></div>
+                    <div className={styles.formGroup}><label className={styles.label}>Sektör *</label><select className={styles.select} value={analysisForm.sector} onChange={e => setAnalysisForm({ ...analysisForm, sector: e.target.value })}><option value="">Seçin...</option>{sectorList.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}</select></div>
                   </div>
                   <div className={styles.formGroup}><label className={styles.label}>Açıklama *</label><textarea className={styles.textarea} rows={5} placeholder="Analizin kapsamını açıklayın..." value={analysisForm.description} onChange={e => setAnalysisForm({ ...analysisForm, description: e.target.value })} /></div>
                   <div className={styles.row3}>
@@ -746,16 +795,90 @@ export default function AdminPanel() {
                 <button onClick={handleNewAnalysis} className={styles.saveBtn}><Plus size={16} /> Yeni Ekle</button>
               </div>
               <div className={styles.listTable}>
-                <div className={styles.tableHead}><span>Analiz Adı</span><span>Kategori</span><span>Süre</span><span>İşlem</span></div>
+                <div className={styles.tableHead}><span>Analiz Adı</span><span>Sektör</span><span>Süre</span><span>İşlem</span></div>
                 {liveServices.map(s => (
                   <div key={s.id} className={styles.tableRow}>
                     <span className={styles.tableTitle}>{s.title}</span>
-                    <span className={styles.tableCat}>{s.category}</span>
+                    <span className={styles.tableCat}>{s.sector}</span>
                     <span className={styles.tableDate}>{s.turnaroundTime}</span>
                     <div className={styles.tableActions}>
-                      <Link href={`/analizler/${s.id}`} target="_blank" className={styles.editBtn}><Eye size={14} /></Link>
+                      <Link href={`/analizler/${s.slug}`} target="_blank" className={styles.editBtn}><Eye size={14} /></Link>
                       <button className={styles.editBtn} onClick={() => handleEditAnalysis(s)}><PenSquare size={14} /></button>
-                      <button className={styles.deleteBtn}><Trash2 size={14} /></button>
+                      <button className={styles.deleteBtn} onClick={() => handleDeleteAnalysis(s.id)}><Trash2 size={14} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {tab === 'sectors' && (
+            <div>
+              <div className={styles.pageHeader}>
+                <div><h1 className={styles.pageTitle}>Sektör Yönetimi</h1><p className={styles.pageDesc}>Analizlerin bağlı olduğu ana sektörleri yönetin.</p></div>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', maxWidth: '400px' }}>
+                <input className={styles.input} value={newSectorName} onChange={e => setNewSectorName(e.target.value)} placeholder="Yeni sektör adı..." />
+                <button className={styles.saveBtn} onClick={async () => { 
+                  if (newSectorName.trim()) { 
+                    const res = await fetch('/api/admin/sectors', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ name: newSectorName.trim() })
+                    });
+                    if (res.ok) {
+                      const addedSec = await res.json();
+                      setSectorList([...sectorList, addedSec]); 
+                      setNewSectorName(''); 
+                    }
+                  } 
+                }}>Ekle</button>
+              </div>
+              <div className={styles.listTable} style={{ maxWidth: '600px' }}>
+                <div className={styles.tableHead}><span>Sektör Adı</span><span>İşlem</span></div>
+                {sectorList.map(s => (
+                  <div key={s.id} className={styles.tableRow}>
+                    {editingSectorId === s.id ? (
+                      <input 
+                        className={styles.input} 
+                        value={editingSectorName} 
+                        onChange={e => setEditingSectorName(e.target.value)}
+                        autoFocus
+                      />
+                    ) : (
+                      <span className={styles.tableTitle}>{s.name}</span>
+                    )}
+                    <div className={styles.tableActions}>
+                      {editingSectorId === s.id ? (
+                        <>
+                          <button className={styles.saveBtn} style={{ padding: '4px 10px', fontSize: '12px' }} onClick={async () => {
+                            const res = await fetch('/api/admin/sectors', {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ id: s.id, name: editingSectorName })
+                            });
+                            if (res.ok) {
+                              setSectorList(sectorList.map(sec => sec.id === s.id ? { ...sec, name: editingSectorName } : sec));
+                              setEditingSectorId(null);
+                            }
+                          }}><Save size={14} /></button>
+                          <button className={styles.deleteBtn} onClick={() => setEditingSectorId(null)}><X size={14} /></button>
+                        </>
+                      ) : (
+                        <>
+                          <button className={styles.editBtn} onClick={() => {
+                            setEditingSectorId(s.id);
+                            setEditingSectorName(s.name);
+                          }}><PenSquare size={14} /></button>
+                          <button className={styles.deleteBtn} onClick={async () => {
+                            if (confirm('Bu sektörü silmek istediğinize emin misiniz?')) {
+                              const res = await fetch(`/api/admin/sectors?id=${s.id}`, { method: 'DELETE' });
+                              if (res.ok) {
+                                setSectorList(sectorList.filter(sec => sec.id !== s.id));
+                              }
+                            }
+                          }}><Trash2 size={14} /></button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -867,7 +990,24 @@ export default function AdminPanel() {
             <div>
               <div className={styles.pageHeader}>
                 <div><h1 className={styles.pageTitle}>Genel Ayarlar</h1><p className={styles.pageDesc}>Sitenin temel bilgilerini, logo ve meta verilerini buradan yönetebilirsiniz.</p></div>
-                <div className={styles.headerActions}><button className={styles.saveBtn} onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }}><Save size={16} /> {saved ? 'Ayarlar Kaydedildi ✓' : 'Ayarları Kaydet'}</button></div>
+                <div className={styles.headerActions}>
+                  <button className={styles.saveBtn} onClick={async () => { 
+                    setSaved(true); 
+                    try {
+                      await fetch('/api/admin/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(siteSettings)
+                      });
+                      setTimeout(() => setSaved(false), 2000); 
+                    } catch (err) {
+                      alert('Ayarlar kaydedilemedi');
+                      setSaved(false);
+                    }
+                  }}>
+                    <Save size={16} /> {saved ? 'Ayarlar Kaydedildi ✓' : 'Ayarları Kaydet'}
+                  </button>
+                </div>
               </div>
               <div className={styles.formGrid}>
                 <div className={styles.formMain}>

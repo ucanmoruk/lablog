@@ -6,7 +6,7 @@
 
 /* Akreditasyon Bandı */
 .accredBand {
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 14px 48px;
 }
 
@@ -25,7 +25,7 @@
   gap: 8px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255, 255, 255, 0.55);
   letter-spacing: 0.01em;
 }
 
@@ -52,13 +52,21 @@
 }
 
 /* Marka Kolonu */
-.brandCol {}
+
 
 .logoRow {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 20px;
+}
+
+.logoImage {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  /* Logo white on dark background */
 }
 
 .logoMark {
@@ -83,7 +91,7 @@
 .desc {
   font-size: 1rem;
   line-height: 1.7;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255, 255, 255, 0.45);
   margin-bottom: 24px;
 }
 
@@ -98,23 +106,23 @@
   align-items: center;
   gap: 10px;
   font-size: 0.95rem;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .contactItem svg {
-  color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.3);
   flex-shrink: 0;
 }
 
 /* Kolonlar */
-.col {}
+
 
 .colTitle {
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.35);
+  color: rgba(255, 255, 255, 0.35);
   margin-bottom: 20px;
 }
 
@@ -127,7 +135,7 @@
 
 .footerLink {
   font-size: 0.95rem;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   transition: color var(--transition);
 }
 
@@ -137,7 +145,7 @@
 
 /* Alt Bar */
 .bottom {
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding: 20px 48px;
 }
 
@@ -152,7 +160,7 @@
 
 .copyright {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .legal {
@@ -162,12 +170,12 @@
 
 .legalLink {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.35);
+  color: rgba(255, 255, 255, 0.35);
   transition: color var(--transition);
 }
 
 .legalLink:hover {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .socials {
@@ -182,14 +190,14 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  color: rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.06);
+  color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
   transition: all var(--transition);
 }
 
 .socialIcon:hover {
   color: white;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 @media (max-width: 1024px) {
@@ -197,6 +205,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 40px;
   }
+
   .brandCol {
     grid-column: span 2;
   }
@@ -206,10 +215,30 @@
   .grid {
     grid-template-columns: 1fr;
   }
-  .brandCol { grid-column: span 1; }
-  .accredInner { gap: 20px; }
-  .bottomInner { flex-direction: column; gap: 16px; text-align: center; }
-  .main { padding: 48px 20px; }
-  .bottom { padding: 20px; }
-  .accredBand { padding: 14px 20px; }
+
+  .brandCol {
+    grid-column: span 1;
+  }
+
+  .accredInner {
+    gap: 20px;
+  }
+
+  .bottomInner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .main {
+    padding: 48px 20px;
+  }
+
+  .bottom {
+    padding: 20px;
+  }
+
+  .accredBand {
+    padding: 14px 20px;
+  }
 }
