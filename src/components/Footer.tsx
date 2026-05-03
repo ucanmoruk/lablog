@@ -48,8 +48,8 @@ export default function Footer({ serverLogo }: { serverLogo?: string | null }) {
               <a href="https://wa.me/905401068640" target="_blank" rel="noopener noreferrer" className={styles.contactItem} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <Phone size={14}/> +90 540 106 86 40
               </a>
-              <a href="mailto:info@laboratuvardan.com" className={styles.contactItem} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <Mail size={14}/> info@laboratuvardan.com
+              <a href="mailto:info@rootlab.tr" className={styles.contactItem} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Mail size={14}/> info@rootlab.tr
               </a>
               <div className={styles.contactItem}><MapPin size={14}/> İstanbul, Türkiye</div>
             </div>

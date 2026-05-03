@@ -71,7 +71,7 @@ export default function ContactPage() {
                 <div className={styles.iconWrap}><Mail size={20} /></div>
                 <div>
                   <div className={styles.infoLabel}>E-posta</div>
-                  <a href="mailto:info@laboratuvardan.com" className={styles.infoVal}>info@laboratuvardan.com</a>
+                  <a href="mailto:info@rootlab.tr" className={styles.infoVal}>info@rootlab.tr</a>
                   <div className={styles.infoSub}>Genel sorular ve teklif talepleri için</div>
                 </div>
               </div>

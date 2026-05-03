@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/panel/',
     },
-    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://laboratuvardan.com'}/sitemap.xml`,
+    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://rootlab.tr'}/sitemap.xml`,
   };
 }

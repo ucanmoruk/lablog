@@ -33,7 +33,7 @@ export default function SectorPageContent({ sector, sectorServices, relatedSecto
               <a href="https://wa.me/905401068640" target="_blank" rel="noopener noreferrer" className={styles.ctaPrimary} style={{ background: sector.accentColor }}>
                 <Phone size={18} /> Hemen Teklif Al
               </a>
-              <a href="mailto:info@laboratuvardan.com" className={styles.ctaSecondary}>
+              <a href="mailto:info@rootlab.tr" className={styles.ctaSecondary}>
                 <Mail size={18} /> E-posta Gönder
               </a>
             </div>

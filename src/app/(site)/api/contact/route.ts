@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     // Send email notification
     try {
       await sendEmail({
-        to: 'info@laboratuvardan.com',
+        to: 'info@rootlab.tr',
         subject: `Yeni İletişim Formu Mesajı: ${name}`,
         html: `
           <div style="font-family: sans-serif; padding: 20px; color: #333;">
