@@ -43,7 +43,7 @@ const STEPS = [
 ];
 
 export const metadata = {
-  title: 'LabLog | Profesyonel Laboratuvar Analiz ve Belgelendirme Çözümleri',
+  title: 'Laboratuvardan | Profesyonel Laboratuvar Analiz ve Belgelendirme Çözümleri',
   description: 'Kozmetik, ilaç, tekstil, gıda ve elektronik sektörlerine yönelik ISO 17025 akredite laboratuvar analizleri, RoHS, REACH ve TAREKS danışmanlığı.',
 };
 
