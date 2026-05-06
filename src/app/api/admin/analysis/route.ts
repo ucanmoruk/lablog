@@ -15,7 +15,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    const { title, description, category, sector, popular, standards, turnaroundTime, sampleRequirement, price } = data;
+    const { title, description, category, sector, popular, standards, turnaroundTime, sampleRequirement, price, seoTitle, seoDescription, keywords } = data;
     
     const slug = title.toLowerCase()
       .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
@@ -32,8 +32,11 @@ export async function POST(req: NextRequest) {
         standards,
         turnaroundTime,
         sampleRequirement,
-        price
-      }
+        price,
+        seoTitle,
+        seoDescription,
+        keywords
+      } as any
     });
     return NextResponse.json(analysis);
   } catch (error) {
@@ -45,7 +48,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const data = await req.json();
-    const { id, title, description, category, sector, popular, standards, turnaroundTime, sampleRequirement, price } = data;
+    const { id, title, description, category, sector, popular, standards, turnaroundTime, sampleRequirement, price, seoTitle, seoDescription, keywords } = data;
 
     const analysis = await prisma.analysis.update({
       where: { id },
@@ -58,8 +61,11 @@ export async function PUT(req: NextRequest) {
         standards,
         turnaroundTime,
         sampleRequirement,
-        price
-      }
+        price,
+        seoTitle,
+        seoDescription,
+        keywords
+      } as any
     });
     return NextResponse.json(analysis);
   } catch (error) {

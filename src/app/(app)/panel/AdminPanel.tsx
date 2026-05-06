@@ -162,6 +162,7 @@ export default function AdminPanel() {
     title: '', category: '', sector: '', standard: '',
     turnaroundTime: '', sampleRequirement: '', description: '',
     popular: false, price: '',
+    seoTitle: '', seoDescription: '', keywords: '',
   });
 
   const handleSave = async () => {
@@ -247,13 +248,16 @@ export default function AdminPanel() {
     setAnalysisForm({
       title: service.title,
       category: service.category,
-      sector: service.category,
+      sector: service.sector || service.category,
       standard: service.standards || '',
       turnaroundTime: service.turnaroundTime || '',
       sampleRequirement: service.sampleRequirement || '',
       description: service.description,
       popular: service.popular || false,
-      price: 'İstek Üzerine',
+      price: service.price || 'İstek Üzerine',
+      seoTitle: service.seoTitle || '',
+      seoDescription: service.seoDescription || '',
+      keywords: service.keywords || '',
     });
     setTab('analysis-new');
   };
@@ -277,6 +281,7 @@ export default function AdminPanel() {
       title: '', category: '', sector: '', standard: '',
       turnaroundTime: '', sampleRequirement: '', description: '',
       popular: false, price: '',
+      seoTitle: '', seoDescription: '', keywords: '',
     });
     setTab('analysis-new');
   };
@@ -758,6 +763,22 @@ export default function AdminPanel() {
                     <h3 className={styles.sideTitle}>Ayarlar</h3>
                     <div className={styles.formGroup}><label className={styles.checkLabel}><input type="checkbox" checked={analysisForm.popular} onChange={e => setAnalysisForm({ ...analysisForm, popular: e.target.checked })} /> Popüler Analiz olarak işaretle</label></div>
                     <div className={styles.formGroup}><label className={styles.label}>Fiyat Bilgisi</label><input className={styles.input} placeholder="İstek Üzerine / ₺ 850" value={analysisForm.price} onChange={e => setAnalysisForm({ ...analysisForm, price: e.target.value })} /></div>
+                  </div>
+
+                  <div className={styles.sideCard}>
+                    <h3 className={styles.sideTitle}>SEO Ayarları</h3>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Meta Başlık (Title)</label>
+                      <input className={styles.input} placeholder="Boş bırakılırsa analiz adı kullanılır" value={analysisForm.seoTitle} onChange={e => setAnalysisForm({ ...analysisForm, seoTitle: e.target.value })} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>Anahtar Kelimeler</label>
+                      <input className={styles.input} placeholder="virgülle ayırın" value={analysisForm.keywords} onChange={e => setAnalysisForm({ ...analysisForm, keywords: e.target.value })} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.label}>SEO Açıklaması (Description)</label>
+                      <textarea className={styles.textarea} rows={3} placeholder="Arama sonuçlarında görünecek kısa açıklama..." value={analysisForm.seoDescription} onChange={e => setAnalysisForm({ ...analysisForm, seoDescription: e.target.value })} />
+                    </div>
                   </div>
                 </div>
               </div>

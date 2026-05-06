@@ -35,9 +35,37 @@
 
 /* ─── Header ─── */
 .header {
-  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
   margin-bottom: 40px;
-  max-width: 800px;
+  max-width: 1200px;
+}
+
+.headerContent {
+  flex: 1;
+  text-align: left;
+}
+
+.headerVisual {
+  width: 120px;
+  height: 120px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 10px 25px rgba(var(--primary-rgb), 0.1);
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
 
 .categoryBadge {
@@ -370,13 +398,9 @@
 }
 
 @media (max-width: 768px) {
-  .main { padding-top: 80px; }
-  .article, .breadcrumb { padding: 0 20px 60px; }
-  .title { font-size: 2rem; }
-  .heroImageContainer { aspect-ratio: 16 / 9; margin-bottom: 36px; border-radius: 16px; }
-  .techDataSection { grid-template-columns: 1fr; gap: 20px; }
-  .actionArea { padding: 28px 20px; }
-  .articleFooter { flex-direction: column; align-items: flex-start; }
+  .header { flex-direction: column-reverse; align-items: flex-start; gap: 24px; }
+  .headerVisual { width: 80px; height: 80px; }
+  .headerVisual svg { width: 32px; height: 32px; }
 }
 
 .blogCard {

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 export const dynamic = 'force-dynamic';
 import styles from './service.module.css';
 import ClientAddButton from './ClientAddButton';
-import { Shield, Clock, Beaker, ArrowRight, ChevronLeft, User, Calendar, Award, Share2, Zap } from 'lucide-react';
+import { Shield, Clock, Beaker, ArrowRight, ChevronLeft, User, Calendar, Award, Share2, Zap, FlaskConical, Sparkles, Utensils, Droplets, Dna, Scissors, Boxes } from 'lucide-react';
 import Link from 'next/link';
 
 
@@ -36,10 +36,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!service) return { title: 'Bulunamadı' };
   
   return {
-    title: `${service.title} | Laboratuvar Analizi`,
-    description: service.description,
+    title: service.seoTitle || `${service.title} | Laboratuvar Analizi`,
+    description: service.seoDescription || service.description,
+    keywords: service.keywords || `${service.category}, laboratuvar analizi, test hizmetleri`,
+    openGraph: {
+      title: service.seoTitle || service.title,
+      description: service.seoDescription || service.description,
+      type: 'website',
+    }
   };
 }
+
+const getCategoryIcon = (category: string) => {
+  const cat = category?.toLowerCase() || '';
+  if (cat.includes('ilaç')) return <FlaskConical size={48} />;
+  if (cat.includes('kozmetik')) return <Sparkles size={48} />;
+  if (cat.includes('gıda')) return <Utensils size={48} />;
+  if (cat.includes('çevre') || cat.includes('su')) return <Droplets size={48} />;
+  if (cat.includes('mikrobiyoloji')) return <Dna size={48} />;
+  if (cat.includes('tekstil')) return <Scissors size={48} />;
+  if (cat.includes('ambalaj')) return <Boxes size={48} />;
+  return <Beaker size={48} />;
+};
 
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
@@ -135,12 +153,17 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
       <article className={styles.article}>
         <header className={styles.header}>
-          <div className={styles.categoryBadge}>{service.category}</div>
-          <h1 className={styles.title}>{service.title}</h1>
-          <div className={styles.meta}>
-            <div className={styles.metaItem}><User size={18} /> <span>Teknik Uzman Kadro</span></div>
-            <div className={styles.metaItem}><Calendar size={18} /> <span>ISO 17025 Akredite</span></div>
-            <div className={styles.metaItem}><Clock size={18} /> <span>Hızlı Raporlama</span></div>
+          <div className={styles.headerContent}>
+            <div className={styles.categoryBadge}>{service.category}</div>
+            <h1 className={styles.title}>{service.title}</h1>
+            <div className={styles.meta}>
+              <div className={styles.metaItem}><User size={18} /> <span>Teknik Uzman Kadro</span></div>
+              <div className={styles.metaItem}><Calendar size={18} /> <span>ISO 17025 Akredite</span></div>
+              <div className={styles.metaItem}><Clock size={18} /> <span>Hızlı Raporlama</span></div>
+            </div>
+          </div>
+          <div className={styles.headerVisual}>
+            {getCategoryIcon(service.category)}
           </div>
         </header>
 

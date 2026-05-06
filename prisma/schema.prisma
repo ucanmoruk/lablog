@@ -22,6 +22,9 @@ model Analysis {
   turnaroundTime    String?
   sampleRequirement String?
   price             String?  @default("İstek Üzerine")
+  seoTitle          String?
+  seoDescription    String?
+  keywords          String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

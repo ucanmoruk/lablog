@@ -185,6 +185,21 @@ export default function HomeClient({ children }: { children: React.ReactNode }) 
                 </div>
               )}
             </div>
+
+            <div className={styles.chips}>
+              {CHIPS.map(c => (
+                <button 
+                  key={c} 
+                  className={styles.chip} 
+                  onClick={() => {
+                    const cleanQuery = c.replace(/[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ\s\/]/g, '').trim();
+                    setQuery(cleanQuery);
+                  }}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className={styles.heroStats}>
