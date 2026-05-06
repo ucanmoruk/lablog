@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const { title, description, category, sector, popular, standards, turnaroundTime, sampleRequirement, price, seoTitle, seoDescription, keywords } = data;
     
-    const slug = title.toLowerCase()
+    const slugBase = seoTitle || title;
+    const slug = slugBase.toLowerCase()
       .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
       .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
 
@@ -54,6 +55,9 @@ export async function PUT(req: NextRequest) {
       where: { id },
       data: {
         title,
+        slug: (seoTitle || title).toLowerCase()
+          .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+          .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-'),
         description,
         category,
         sector,
