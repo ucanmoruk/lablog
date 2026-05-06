@@ -91,7 +91,7 @@ export async function POST(request: Request) {
         html: `
           <div style="font-family: sans-serif; padding: 30px; color: #333; max-width: 700px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px;">
             <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #1d1d1f; margin: 0;">Laboratuvardan</h1>
+                <h1 style="color: #1d1d1f; margin: 0;">RootLab</h1>
                 <p style="color: #666; font-size: 14px;">Akredite Laboratuvar Hizmetleri</p>
                 <div style="margin-top: 10px; font-size: 12px; color: #aeaeb2;">Teklif No: ${updatedMessage.id.substring(0, 8).toUpperCase()} | Tarih: ${new Date().toLocaleDateString('tr-TR')}</div>
             </div>
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
             
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
             <p style="font-size: 12px; color: #999; text-align: center;">
-                Laboratuvardan Laboratuvar Yönetim Birimi
+                RootLab Laboratuvar Yönetim Birimi
             </p>
           </div>
         `

@@ -59,7 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <FlaskConical size={18} strokeWidth={2.5} />
             </div>
             <div>
-              <div className={styles.sidebarLogoText}>LabLog</div>
+              <div className={styles.sidebarLogoText}>RootLab</div>
               <div className={styles.sidebarLogoSub}>Müşteri Paneli</div>
             </div>
           </Link>

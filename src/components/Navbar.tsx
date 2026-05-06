@@ -74,8 +74,7 @@ export default function Navbar({ serverLogo }: { serverLogo?: string | null }) {
                 <div className={styles.logoMark}>
                   <FlaskConical size={18} strokeWidth={2.5} />
                 </div>
-                <span className={styles.logoText}>LabÇözüm</span>
-                <span className={styles.logoSub}>Merkezi</span>
+                <span className={styles.logoText}>RootLab</span>
               </>
             )}
           </Link>

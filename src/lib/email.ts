@@ -21,7 +21,7 @@ export async function sendEmail({ to, subject, html, cc }: { to: string; subject
     }
 
     const info = await transporter.sendMail({
-      from: `"LabLog Bildirim" <${process.env.SMTP_USER}>`,
+      from: `"RootLab Bildirim" <${process.env.SMTP_USER}>`,
       to,
       cc,
       subject,

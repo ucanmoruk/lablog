@@ -39,7 +39,7 @@ export default function Footer({ serverLogo }: { serverLogo?: string | null }) {
               ) : (
                 <>
                   <div className={styles.logoMark}><FlaskConical size={18} strokeWidth={2.5}/></div>
-                  <span className={styles.logoText}>LabÇözüm Merkezi</span>
+                  <span className={styles.logoText}>RootLab</span>
                 </>
               )}
             </Link>
@@ -91,7 +91,7 @@ export default function Footer({ serverLogo }: { serverLogo?: string | null }) {
       </div>
       <div className={styles.bottom}>
         <div className={styles.bottomInner}>
-          <p className={styles.copyright}>© {new Date().getFullYear()} LabÇözüm Merkezi. Tüm hakları saklıdır.</p>
+          <p className={styles.copyright}>© {new Date().getFullYear()} RootLab. Tüm hakları saklıdır.</p>
           <div className={styles.legal}>
             <Link href="/privacy" className={styles.legalLink}>Gizlilik Politikası</Link>
             <Link href="/terms" className={styles.legalLink}>Kullanım Koşulları</Link>
