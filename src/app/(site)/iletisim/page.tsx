@@ -89,16 +89,22 @@ export default function ContactPage() {
                 <div className={styles.iconWrap}><MapPin size={20} /></div>
                 <div>
                   <div className={styles.infoLabel}>Merkez Laboratuvar</div>
-                  <div className={styles.infoVal}>Teknopark İstanbul, Pendik / İstanbul</div>
+                  <div className={styles.infoVal}>Yakuplu Mah. Hürriyet Bulv. Yakuplu Eval Plaza No:131/40 Beylikdüzü İstanbul</div>
                   <div className={styles.infoSub}>Numune kabulü bu adrese yapılmaktadır</div>
                 </div>
               </div>
             </div>
 
             <div className={styles.mapWrap}>
-               <div className={styles.mapPlaceholder}>
-                 <span>Harita Görünümü</span>
-               </div>
+               <iframe 
+                src="https://www.google.com/maps?q=Yakuplu+Mah.+Hürriyet+Bulv.+Yakuplu+Eval+Plaza+No:131/40+Beylikdüzü+İstanbul&output=embed" 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0, borderRadius: '24px' }} 
+                allowFullScreen={true} 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
           </div>
 

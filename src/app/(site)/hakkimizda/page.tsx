@@ -59,7 +59,7 @@ export default function AboutPage() {
           </p>
         </div>
         <div className={styles.storyImage}>
-          <div className={styles.imgPlaceholder}>Laboratuvar Görseli</div>
+          <img src="/images/about-lab.png" alt="Laboratuvar Görseli" className={styles.labImage} />
         </div>
       </section>
 
@@ -72,24 +72,24 @@ export default function AboutPage() {
         
         <div className={styles.valuesGrid}>
           <div className={styles.valueCard}>
-             <div className={styles.vIcon}><Shield size={24}/></div>
-             <h3>Tarafsızlık & Gizlilik</h3>
-             <p>Bağımsızlığımızı her koşulda korur, müşteri verilerini en yüksek güvenlik standartlarında saklarız.</p>
+            <div className={styles.vIcon}><Shield size={24}/></div>
+            <h3>Tarafsızlık & Gizlilik</h3>
+            <p>Bağımsızlığımızı her koşulda korur, müşteri verilerini en yüksek güvenlik standartlarında saklarız.</p>
           </div>
           <div className={styles.valueCard}>
-             <div className={styles.vIcon}><Award size={24}/></div>
-             <h3>Bilimsel Mükemmellik</h3>
-             <p>En güncel uluslararası metodolojileri (ISO, EN, USP) kullanır ve cihaz parkurumuzu sürekli yenileriz.</p>
+            <div className={styles.vIcon}><Award size={24}/></div>
+            <h3>Bilimsel Mükemmellik</h3>
+            <p>En güncel uluslararası metodolojileri (ISO, EN, USP) kullanır ve cihaz parkurumuzu sürekli yenileriz.</p>
           </div>
           <div className={styles.valueCard}>
-             <div className={styles.vIcon}><CheckCircle2 size={24}/></div>
-             <h3>Hız & Güvenilirlik</h3>
-             <p>Zamanın ihracat ve üretim süreçlerindeki önemini bilir, taahhüt ettiğimiz sürede kesin sonuç veririz.</p>
+            <div className={styles.vIcon}><CheckCircle2 size={24}/></div>
+            <h3>Hız & Güvenilirlik</h3>
+            <p>Zamanın ihracat ve üretim süreçlerindeki önemini bilir, taahhüt ettiğimiz sürede kesin sonuç veririz.</p>
           </div>
           <div className={styles.valueCard}>
-             <div className={styles.vIcon}><Users size={24}/></div>
-             <h3>Çözüm Ortaklığı</h3>
-             <p>Analiz raporuyla yetinmez, sonuçların yorumlanması ve iyileştirme süreçlerinde danışmanlık yaparız.</p>
+            <div className={styles.vIcon}><Users size={24}/></div>
+            <h3>Çözüm Ortaklığı</h3>
+            <p>Analiz raporuyla yetinmez, sonuçların yorumlanması ve iyileştirme süreçlerinde danışmanlık yaparız.</p>
           </div>
         </div>
       </section>
